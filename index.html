@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="AFODAN — daily savings collection manager for collectors and their clients. Works offline.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>AFODAN</title>
+<style>
+  :root{
+    /* brand — indigo→violet fintech palette */
+    --brand:#4f46e5; --brand-d:#4338ca; --brand-l:#7c3aed; --violet:#6d28d9; --ink-btn:#0b1020;
+    /* aliases so existing components reskin to the brand automatically */
+    --teal:#4f46e5; --teal-d:#4338ca; --teal-l:#7c3aed;
+    --green:#16a34a; --amber:#d97706; --red:#e11d48; --blue:#4f46e5; --gold:#c9962b;
+    --bg:#f4f5f9; --card:#ffffff; --ink:#0b1020; --muted:#6b7280;
+    --line:#ecedf4; --soft:#f6f7fb;
+    --shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.06);
+    --shadow-lg:0 22px 48px rgba(16,24,40,.20);
+    --r:20px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI","Segoe UI Variable Text","Segoe UI Web (West European)",-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg); color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:calc(72px + env(safe-area-inset-bottom));
+    overscroll-behavior-y:none;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  input,select,textarea{font-family:inherit;font-size:16px}
+
+  .app-header{
+    position:sticky;top:0;z-index:40;
+    background:rgba(255,255,255,.82);backdrop-filter:saturate(1.6) blur(16px);
+    color:var(--ink);padding:calc(11px + env(safe-area-inset-top)) 18px 11px;
+    border-bottom:1px solid var(--line);
+  }
+  .app-header .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .app-header h1{margin:0;font-size:16.5px;font-weight:800;letter-spacing:.4px;display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .logo-dot{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-l));display:grid;place-items:center;font-size:15px;color:#fff;box-shadow:0 4px 12px rgba(79,70,229,.35)}
+  .head-sub{font-size:11.5px;color:var(--muted);margin-top:1px;font-weight:500}
+  .head-btn{color:var(--ink);background:var(--soft);border:1px solid var(--line);width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:17px}
+  .offline-pill{font-size:11px;background:#fff1f2;color:#e11d48;border:1px solid #fecdd3;padding:3px 9px;border-radius:999px;display:none;align-items:center;gap:5px;font-weight:600}
+  .offline-pill.show{display:inline-flex}
+
+  /* fintech home components */
+  .greet{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 2px 16px}
+  .greet .hi{font-size:22px;font-weight:800;letter-spacing:-.2px}
+  .greet .hisub{font-size:13px;color:var(--muted);margin-top:2px;font-weight:500}
+  .pill-ghost{background:var(--soft);border:1px solid var(--line);color:var(--muted);font-weight:700;font-size:12px;padding:8px 13px;border-radius:999px}
+  .balance-card{position:relative;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-l) 62%,var(--violet) 100%);color:#fff;border-radius:26px;padding:20px 20px 22px;box-shadow:0 18px 40px rgba(79,70,229,.34);overflow:hidden}
+  .balance-card::after{content:"";position:absolute;right:-40px;top:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.10)}
+  .balance-card::before{content:"";position:absolute;right:20px;top:60px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.06)}
+  .bc-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+  .bc-lbl{font-size:12.5px;opacity:.92;font-weight:600;letter-spacing:.2px}
+  .bc-amt{font-size:34px;font-weight:800;letter-spacing:-.6px;margin:8px 0 3px;position:relative;z-index:1}
+  .bc-delta{font-size:12.5px;opacity:.9;font-weight:500;position:relative;z-index:1}
+  .bc-foot{display:flex;gap:26px;margin-top:20px;position:relative;z-index:1}
+  .bc-k{font-size:11px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .bc-v{font-size:15px;font-weight:700;margin-top:3px}
+  .bc-cta{position:absolute;right:16px;bottom:18px;z-index:2;background:var(--ink-btn);color:#fff;font-weight:700;font-size:13.5px;padding:11px 18px;border-radius:14px;box-shadow:0 8px 18px rgba(11,16,32,.4);display:inline-flex;align-items:center;gap:7px}
+  .bc-cta:active{transform:scale(.96)}
+  .qacts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 6px}
+  .qact{display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 4px 11px;font-size:11.5px;font-weight:700;color:var(--ink);box-shadow:var(--shadow)}
+  .qact:active{transform:scale(.96)}
+  .qact .qi{width:40px;height:40px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:18px;color:var(--brand)}
+  .row-between{display:flex;align-items:center;justify-content:space-between;margin:24px 4px 12px}
+  .row-between h3.blk{margin:0;font-size:16px;font-weight:800}
+  .row-between .link{font-size:13px}
+
+  .screen{display:none;padding:16px 16px 24px;animation:fade .18s ease}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:22px 4px 10px}
+  .section-title:first-child{margin-top:6px}
+
+  .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+  .card + .card{margin-top:12px}
+
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:15px 15px 14px;position:relative;overflow:hidden}
+  .stat .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;margin-bottom:10px}
+  .stat .lbl{font-size:12.5px;color:var(--muted);font-weight:600}
+  .stat .val{font-size:21px;font-weight:800;margin-top:2px;letter-spacing:-.3px}
+  .stat.wide{grid-column:1 / -1}
+  .ic.t{background:#ccfbf1;color:var(--teal)} .ic.g{background:#dcfce7;color:var(--green)}
+  .ic.a{background:#fef3c7;color:var(--amber)} .ic.b{background:#dbeafe;color:var(--blue)}
+  .ic.r{background:#fee2e2;color:var(--red)} .ic.p{background:#f3e8ff;color:#7c3aed}
+
+  .hero{background:linear-gradient(135deg,var(--teal),var(--teal-l));color:#fff;border-radius:var(--r);padding:18px;box-shadow:0 8px 24px rgba(15,118,110,.28)}
+  .hero .lbl{font-size:13px;opacity:.9;font-weight:600}
+  .hero .amt{font-size:32px;font-weight:800;margin:4px 0 2px;letter-spacing:-.5px}
+  .hero .meta{font-size:12.5px;opacity:.85}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--teal);color:#fff;font-weight:700;font-size:15px;padding:13px 18px;border-radius:13px;width:100%;transition:transform .06s,filter .15s}
+  .btn:active{transform:scale(.98)}
+  .btn.sec{background:var(--soft);color:var(--ink);border:1.5px solid var(--line)}
+  .btn.green{background:var(--green)} .btn.amber{background:var(--amber)} .btn.red{background:var(--red)} .btn.blue{background:var(--blue)}
+  .btn.sm{width:auto;padding:9px 14px;font-size:13.5px;border-radius:10px}
+  .btn.ghost{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+  .btn:disabled{opacity:.5;pointer-events:none}
+  .btn-row{display:flex;gap:10px;margin-top:14px}
+
+  .cli{display:flex;align-items:center;gap:13px;padding:13px 14px;background:var(--card);border-radius:14px;box-shadow:var(--shadow);margin-bottom:10px;width:100%;text-align:left}
+  .cli:active{transform:scale(.995)}
+  .avatar{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:#fff;font-size:16px;flex-shrink:0}
+  .cli .nm{font-weight:700;font-size:15px}
+  .cli .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .cli .rt{margin-left:auto;text-align:right;flex-shrink:0}
+  .cli .rt .bal{font-weight:800;font-size:15px}
+  .cli .rt .dcount{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .chip.paid{background:#dcfce7;color:#15803d} .chip.due{background:#fef3c7;color:#b45309}
+  .chip.done{background:#e0e7ff;color:#4338ca} .chip.new{background:#ccfbf1;color:#0f766e}
+  .chip.gray{background:#eef2f6;color:#64748b}
+
+  .prog{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:6px}
+  .prog > i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-l));border-radius:999px;transition:width .4s}
+  .prog.full > i{background:linear-gradient(90deg,#15803d,#22c55e)}
+  .daygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(28px,1fr));gap:5px;margin-top:12px}
+  .day{aspect-ratio:1;border-radius:7px;background:var(--soft);border:1.5px solid var(--line);display:grid;place-items:center;font-size:10.5px;font-weight:700;color:var(--muted)}
+  .day.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .day.charge{background:#fef3c7;border-color:#fcd34d;color:#b45309}
+
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px}
+  .field input,.field select,.field textarea{
+    width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);transition:border .15s,background .15s}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal);background:#fff}
+  .field .hint{font-size:12px;color:var(--muted);margin-top:5px}
+  .amt-input{position:relative}
+  .amt-input .cur{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:700;color:var(--muted);pointer-events:none}
+  .amt-input input{padding-left:52px;font-size:18px;font-weight:700}
+  .days-readout{font-size:12.5px;font-weight:700;color:var(--teal);margin-top:6px}
+
+  .empty{text-align:center;padding:48px 20px;color:var(--muted)}
+  .empty .em{font-size:44px;margin-bottom:12px}
+  .empty h3{margin:0 0 6px;color:var(--ink);font-size:17px}
+  .empty p{margin:0;font-size:14px;line-height:1.5}
+
+  .fab{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:18px;background:var(--teal);color:#fff;font-size:26px;display:grid;place-items:center;box-shadow:0 8px 20px rgba(15,118,110,.4);z-index:45}
+  .fab:active{transform:scale(.94)}
+
+  .nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:9px 6px calc(9px + env(safe-area-inset-bottom));justify-content:space-around;align-items:flex-end}
+  .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:10.5px;font-weight:600;padding:4px 2px;border-radius:12px}
+  .nav button .ni{font-size:20px;line-height:1;filter:grayscale(.2)}
+  .nav button.on{color:var(--brand)}
+  .nav button.on .ni{filter:none}
+  .nav button.navc{flex:0 0 auto;margin-top:-26px}
+  .nav .navc-in{width:56px;height:56px;border-radius:20px;background:linear-gradient(135deg,var(--brand),var(--brand-l));display:grid;place-items:center;font-size:24px;color:#fff;box-shadow:0 10px 22px rgba(79,70,229,.45);border:4px solid var(--bg)}
+  .nav button.navc:active .navc-in{transform:scale(.94)}
+
+  .sheet-bg{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
+  .sheet-bg.show{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--card);border-radius:22px 22px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+  .sheet.show{transform:translateY(0)}
+  .sheet .grip{width:40px;height:4px;border-radius:999px;background:var(--line);margin:0 auto 16px}
+  .sheet h2{margin:0 0 4px;font-size:20px}
+  .sheet .sub{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+
+  .kv{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--muted);font-size:14px}
+  .kv .v{font-weight:700;font-size:15px}
+  .kv .v.big{font-size:18px}
+  .kv .v.pos{color:var(--green)} .kv .v.neg{color:var(--red)} .kv .v.charge{color:var(--amber)}
+
+  .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:13px;font-size:14px;font-weight:600;z-index:80;opacity:0;pointer-events:none;transition:all .25s;box-shadow:var(--shadow-lg);max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.good{background:var(--green)} .toast.bad{background:var(--red)}
+
+  .list-hdr{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 12px}
+  .list-hdr h2{margin:0;font-size:22px;font-weight:800}
+  .search{position:relative;margin-bottom:14px}
+  .search input{width:100%;padding:12px 14px 12px 40px;border:1.5px solid var(--line);border-radius:13px;background:#fff}
+  .search .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted)}
+  .seg{display:flex;background:var(--soft);border-radius:12px;padding:4px;margin-bottom:14px;gap:4px}
+  .seg button{flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:700;color:var(--muted)}
+  .seg button.on{background:#fff;color:var(--teal);box-shadow:var(--shadow)}
+
+  .plan-card{border:1.5px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:#fff}
+  .plan-card .ph{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .plan-card .plabel{font-weight:800;font-size:15px}
+  .plan-card .pmeta{font-size:12px;color:var(--muted);margin-top:1px}
+  .plan-card .pbal{font-weight:800;font-size:17px;text-align:right}
+
+  .mini-bar{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:8px;padding:0 2px}
+  .mini-bar .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+  .mini-bar .b > i{width:100%;max-width:34px;background:linear-gradient(180deg,var(--teal-l),var(--teal));border-radius:7px 7px 0 0;min-height:4px;transition:height .5s}
+  .mini-bar .b .bl{font-size:10.5px;color:var(--muted);font-weight:600}
+  .mini-bar .b .bv{font-size:10px;color:var(--ink);font-weight:700}
+
+  .txn{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .txn:last-child{border-bottom:none}
+  .txn .ti{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:15px;flex-shrink:0;background:var(--soft)}
+  .txn .tt{font-weight:600;font-size:14px} .txn .ts{font-size:12px;color:var(--muted);margin-top:1px}
+  .txn .ta{margin-left:auto;font-weight:800;font-size:14.5px}
+  .divider{height:1px;background:var(--line);margin:16px 0}
+  .note-box{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;font-size:13px;color:#92400e;line-height:1.5}
+  .link{color:var(--teal);font-weight:700;background:none;padding:0;font-size:14px}
+  .quick-amts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .quick-amts button{background:var(--soft);border:1.5px solid var(--line);border-radius:10px;padding:7px 13px;font-weight:700;font-size:13px;color:var(--ink)}
+  .quick-amts button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+  table.pbk{width:100%;border-collapse:collapse;font-size:12.5px;min-width:360px}
+  table.pbk th,table.pbk td{border:1px solid var(--line);padding:7px 8px;text-align:left;white-space:nowrap}
+  table.pbk th{background:var(--soft);font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+  table.pbk td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  table.pbk tfoot td{background:var(--soft);font-weight:800}
+  .photo-pick{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .photo-pick .pp-prev{width:64px;height:64px;border-radius:16px;background:var(--soft);border:1.5px dashed var(--line);display:grid;place-items:center;font-size:24px;color:var(--muted);background-size:cover;background-position:center;overflow:hidden;flex-shrink:0}
+  .photo-pick .pp-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .cam-ov{position:fixed;inset:0;z-index:90;background:#000;display:flex;flex-direction:column}
+  .cam-ov video{flex:1;width:100%;object-fit:cover;background:#000}
+  .cam-guide{position:absolute;top:0;left:0;right:0;text-align:center;color:#fff;font-size:13px;font-weight:600;padding:calc(16px + env(safe-area-inset-top)) 16px 0;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+  .cam-bar{display:flex;align-items:center;justify-content:space-between;padding:20px 30px calc(26px + env(safe-area-inset-bottom));background:#000}
+  .cam-shot{width:70px;height:70px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.35)}
+  .cam-shot:active{transform:scale(.93)}
+  .cam-x{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:19px;display:grid;place-items:center}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="row">
+    <div>
+      <h1><span class="logo-dot">A</span> <span id="bizName">AFODAN</span></h1>
+      <div class="head-sub" id="headSub">Daily savings manager</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="offline-pill" id="offlinePill">● Offline</span>
+      <button class="head-btn" id="btnSettings" aria-label="Settings">⚙</button>
+    </div>
+  </div>
+</header>
+
+<!-- HOME -->
+<main class="screen active" id="screen-home">
+  <div class="greet">
+    <div><div class="hi" id="greetHi">Hello</div><div class="hisub" id="greetSub">Here's today's collection</div></div>
+    <button class="pill-ghost" id="greetDate">—</button>
+  </div>
+  <div class="balance-card">
+    <div class="bc-top"><span class="bc-lbl">Total savings you're holding</span></div>
+    <div class="bc-amt" id="homeHolding">GH₵0</div>
+    <div class="bc-delta" id="homeHoldingMeta">across 0 plans</div>
+    <div class="bc-foot">
+      <div><div class="bc-k">Collected today</div><div class="bc-v" id="homeToday">GH₵0</div></div>
+      <div><div class="bc-k">Clients</div><div class="bc-v" id="homeClients">0</div></div>
+    </div>
+    <button class="bc-cta" id="homeGoCollect">📥 Collect</button>
+  </div>
+  <div class="qacts" id="homeQacts">
+    <button class="qact" data-act="collect"><span class="qi">📥</span>Collect</button>
+    <button class="qact" data-act="add"><span class="qi">＋</span>Add client</button>
+    <button class="qact" data-act="money"><span class="qi">💸</span>Withdraw</button>
+    <button class="qact" data-act="reports"><span class="qi">📊</span>Reports</button>
+  </div>
+  <div class="stat-grid" style="margin-top:12px">
+    <div class="stat"><div class="ic p">📈</div><div class="lbl">Profit this month</div><div class="val" id="homeProfitMonth">GH₵0</div></div>
+    <div class="stat"><div class="ic b">🏆</div><div class="lbl">Total profit</div><div class="val" id="homeProfitTotal">GH₵0</div></div>
+  </div>
+  <div class="row-between"><h3 class="blk">Needs attention</h3><span class="pill-ghost" id="homePaidPill">0/0 today</span></div>
+  <div id="homeAttention"></div>
+</main>
+
+<!-- CLIENTS -->
+<main class="screen" id="screen-clients">
+  <div class="list-hdr"><h2>Clients</h2><button class="btn sm" id="btnAddClient2">+ Add</button></div>
+  <div class="search"><span class="si">🔍</span><input id="cliSearch" placeholder="Search name, phone, business…"></div>
+  <div class="seg" id="cliSeg">
+    <button class="on" data-f="active">Active</button>
+    <button data-f="all">All</button>
+    <button data-f="due">Owe today</button>
+  </div>
+  <div id="clientList"></div>
+</main>
+
+<!-- COLLECT -->
+<main class="screen" id="screen-collect">
+  <div class="list-hdr"><h2>Collect</h2><span class="chip new" id="collectDate"></span></div>
+  <div class="card" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+    <div><div style="font-size:12.5px;color:var(--muted);font-weight:600">Collected today</div><div style="font-size:22px;font-weight:800" id="collectTotal">GH₵0</div></div>
+    <div style="text-align:right"><div style="font-size:12.5px;color:var(--muted);font-weight:600">Remaining</div><div style="font-size:16px;font-weight:700" id="collectRemain">0 plans</div></div>
+  </div>
+  <div class="seg" id="collectSeg">
+    <button class="on" data-f="due">Not collected</button>
+    <button data-f="done">Collected</button>
+  </div>
+  <div id="collectList"></div>
+</main>
+
+<!-- WITHDRAW -->
+<main class="screen" id="screen-money">
+  <div class="list-hdr"><h2>Withdrawals</h2></div>
+  <div class="note-box" style="margin-bottom:14px">💡 Each plan runs for <b>31 days</b>. When a plan finishes (or is cashed out), the business keeps <b>1 day's contribution</b> as its service charge — the client receives the rest.</div>
+  <div class="seg" id="moneySeg">
+    <button class="on" data-f="ready">Ready to pay out</button>
+    <button data-f="all">All plans</button>
+  </div>
+  <div id="moneyList"></div>
+</main>
+
+<!-- REPORTS -->
+<main class="screen" id="screen-reports">
+  <div class="list-hdr"><h2>Reports</h2></div>
+  <div class="hero" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">
+    <div class="lbl">Total profit (service charges)</div>
+    <div class="amt" id="repProfit">GH₵0</div>
+    <div class="meta" id="repProfitMeta">from 0 completed plans</div>
+  </div>
+  <div class="section-title">Profit — last 6 months</div>
+  <div class="card"><div class="mini-bar" id="repChart"></div></div>
+  <div class="section-title">Overview</div>
+  <div class="card" id="repOverview"></div>
+  <div class="section-title">Recent payouts</div>
+  <div class="card" id="repPayouts"></div>
+  <div class="divider"></div>
+  <button class="btn sec" id="btnExport">⬇ Export all data (backup)</button>
+  <div style="height:8px"></div>
+  <button class="btn sec" id="btnImport">⬆ Restore from backup</button>
+  <input type="file" id="importFile" accept="application/json" hidden>
+</main>
+
+<button class="fab" id="fab">+</button>
+
+<nav class="nav" id="nav">
+  <button class="on" data-s="home"><span class="ni">🏠</span>Home</button>
+  <button data-s="clients"><span class="ni">👥</span>Clients</button>
+  <button class="navc" data-s="collect" aria-label="Collect"><span class="navc-in">📥</span></button>
+  <button data-s="money"><span class="ni">💸</span>Withdraw</button>
+  <button data-s="reports"><span class="ni">📊</span>Reports</button>
+</nav>
+
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet"><div class="grip"></div><div id="sheetBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================================================================
+   AFODAN — offline-first daily savings collection manager
+   Model: Client → many Plans (savings cards) → each Plan has 31-day
+   Cycles. Collections accept ANY amount; days covered = amount/dailyAmount.
+   Business keeps 1 day's contribution per plan-cycle as service charge.
+   All data persists on-device in IndexedDB. Works fully offline.
+   ================================================================== */
+'use strict';
+
+const CYCLE_DAYS = 31;
+const CUR = 'GH₵';
+
+/* ---------- IndexedDB ---------- */
+const DB_NAME='susu_db', DB_VER=2;
+let _db=null;
+function openDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(DB_NAME,DB_VER);
+    r.onupgradeneeded=e=>{
+      const db=e.target.result;
+      const mk=(n,idx)=>{if(!db.objectStoreNames.contains(n)){const s=db.createObjectStore(n,{keyPath:'id'});(idx||[]).forEach(i=>s.createIndex(i,i));}};
+      mk('clients');
+      mk('plans',['clientId']);
+      mk('cycles',['clientId','planId']);
+      mk('collections',['clientId','planId','cycleId','date']);
+      mk('withdrawals',['clientId','planId','cycleId']);
+      if(!db.objectStoreNames.contains('settings'))db.createObjectStore('settings',{keyPath:'key'});
+    };
+    r.onsuccess=e=>{_db=e.target.result;res(_db);};
+    r.onerror=e=>rej(e.target.error);
+  });
+}
+function tx(store,mode){return _db.transaction(store,mode).objectStore(store);}
+function put(store,val){return new Promise((res,rej)=>{const r=tx(store,'readwrite').put(val);r.onsuccess=()=>res(val);r.onerror=()=>rej(r.error);});}
+function del(store,key){return new Promise((res,rej)=>{const r=tx(store,'readwrite').delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});}
+function getAll(store){return new Promise((res,rej)=>{const r=tx(store,'readonly').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});}
+
+/* ---------- helpers ---------- */
+const uid=()=> (Date.now().toString(36)+Math.random().toString(36).slice(2,8));
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const fmtMoney=n=>{n=Math.round(n||0);return CUR+n.toLocaleString('en-US');};
+function niceDate(s){if(!s)return'';const[y,m,d]=s.split('-');const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${d} ${mo[+m-1]} ${y}`;}
+function monthKey(s){return s?s.slice(0,7):'';}
+const AV=['#0f766e','#2563eb','#7c3aed','#d97706','#dc2626','#16a34a','#0891b2','#db2777','#4f46e5','#059669'];
+function avatarColor(id){let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))>>>0;return AV[h%AV.length];}
+function initials(name){return(name||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');}
+function esc(s){return(s==null?'':String(s)).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function avatarHTML(c,size){const st=size?`width:${size}px;height:${size}px;font-size:${Math.round(size*0.36)}px;`:'';
+  if(c&&c.photo)return `<div class="avatar" style="${st}background-image:url('${c.photo}');background-size:cover;background-position:center"></div>`;
+  return `<div class="avatar" style="${st}background:${avatarColor(c.id)}">${initials(c.name)}</div>`;}
+function fileToThumb(file,size){size=size||360;return new Promise((res,rej)=>{const rd=new FileReader();rd.onerror=()=>rej();rd.onload=()=>{const img=new Image();img.onerror=()=>rej();img.onload=()=>{const s=Math.min(img.width,img.height);const cv=document.createElement('canvas');cv.width=cv.height=size;const ctx=cv.getContext('2d');ctx.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,size,size);res(cv.toDataURL('image/jpeg',0.82));};img.src=rd.result;};rd.readAsDataURL(file);});}
+function nextCardNo(){let m=0;S.plans.forEach(p=>{const n=parseInt(p.cardNo,10);if(!isNaN(n))m=Math.max(m,n);});return String(m+1).padStart(3,'0');}
+let _formPhoto='';
+
+/* ---------- cache ---------- */
+let S={clients:[],plans:[],cycles:[],collections:[],withdrawals:[],settings:{}};
+async function loadAll(){
+  const[clients,plans,cycles,collections,withdrawals,settingsArr]=await Promise.all([
+    getAll('clients'),getAll('plans'),getAll('cycles'),getAll('collections'),getAll('withdrawals'),getAll('settings')]);
+  Object.assign(S,{clients,plans,cycles,collections,withdrawals});
+  S.settings={};settingsArr.forEach(x=>S.settings[x.key]=x.value);
+}
+
+/* ---------- domain ---------- */
+const clientPlans=cid=>S.plans.filter(p=>p.clientId===cid);
+const activePlans=cid=>S.plans.filter(p=>p.clientId===cid&&p.status==='active');
+const planById=id=>S.plans.find(p=>p.id===id);
+const clientById=id=>S.clients.find(c=>c.id===id);
+const activeCycle=planId=>S.cycles.find(c=>c.planId===planId&&c.status==='active')||null;
+const cycleCollections=cyId=>S.collections.filter(c=>c.cycleId===cyId);
+const cyclePartials=cyId=>S.withdrawals.filter(w=>w.cycleId===cyId&&w.type==='partial');
+const collectedTotal=cyId=>cycleCollections(cyId).reduce((s,c)=>s+c.amount,0);
+const partialsTotal=cyId=>cyclePartials(cyId).reduce((s,w)=>s+w.amount,0);
+const cycleBalance=cyId=>collectedTotal(cyId)-partialsTotal(cyId);
+// days covered derived from amount (supports lump sums covering many days)
+function daysCovered(cyId,plan){return plan.dailyAmount>0?Math.floor(collectedTotal(cyId)/plan.dailyAmount):0;}
+function serviceCharge(cyId,plan){return Math.min(collectedTotal(cyId),plan.dailyAmount);}
+function collectedToday(cyId){return cycleCollections(cyId).some(c=>c.date===todayStr());}
+function planReady(plan){const cy=activeCycle(plan.id);return cy&&daysCovered(cy.id,plan)>=CYCLE_DAYS;}
+
+// aggregates
+function allActivePlanCycles(){return S.plans.filter(p=>p.status==='active').map(p=>({plan:p,cycle:activeCycle(p.id)})).filter(x=>x.cycle);}
+function totalHolding(){return allActivePlanCycles().reduce((s,x)=>s+cycleBalance(x.cycle.id),0);}
+function clientBalance(cid){return activePlans(cid).reduce((s,p)=>{const cy=activeCycle(p.id);return s+(cy?cycleBalance(cy.id):0);},0);}
+function totalCollectedOn(dateStr){return S.collections.filter(c=>c.date===dateStr).reduce((s,c)=>s+c.amount,0);}
+function totalProfit(){return S.cycles.filter(c=>c.status==='completed').reduce((s,c)=>s+(c.serviceCharge||0),0);}
+function profitInMonth(mk){return S.cycles.filter(c=>c.status==='completed'&&monthKey(c.completedAt)===mk).reduce((s,c)=>s+(c.serviceCharge||0),0);}
+
+/* ---------- mutations ---------- */
+async function addClient(data){
+  const now=new Date().toISOString();
+  const client={id:uid(),name:data.name.trim(),phone:(data.phone||'').trim(),altPhone:(data.altPhone||'').trim(),business:(data.business||'').trim(),note:(data.note||'').trim(),photo:data.photo||'',status:'active',createdAt:now};
+  await put('clients',client);S.clients.push(client);
+  await addPlan(client.id,{label:data.planLabel,dailyAmount:data.dailyAmount,cardNo:data.cardNo});
+  return client;
+}
+async function addPlan(clientId,{label,dailyAmount,cardNo}){
+  const amt=Math.max(1,Math.round(+dailyAmount||0));
+  const plan={id:uid(),clientId,label:(label||'').trim()||(fmtMoney(amt)+'/day'),cardNo:(cardNo||'').trim()||nextCardNo(),dailyAmount:amt,status:'active',createdAt:new Date().toISOString()};
+  await put('plans',plan);S.plans.push(plan);
+  await startCycle(plan);
+  return plan;
+}
+async function startCycle(plan){
+  const num=S.cycles.filter(c=>c.planId===plan.id).reduce((m,c)=>Math.max(m,c.number),0)+1;
+  const cycle={id:uid(),planId:plan.id,clientId:plan.clientId,number:num,startDate:todayStr(),status:'active',targetDays:CYCLE_DAYS,serviceCharge:0,payout:0,collectedTotal:0,completedAt:null,createdAt:new Date().toISOString()};
+  await put('cycles',cycle);S.cycles.push(cycle);
+  return cycle;
+}
+async function recordCollection(plan,amount,dateStr){
+  let cycle=activeCycle(plan.id);if(!cycle)cycle=await startCycle(plan);
+  const c={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,date:dateStr||todayStr(),amount:Math.round(+amount),createdAt:new Date().toISOString()};
+  await put('collections',c);S.collections.push(c);
+  return c;
+}
+async function recordPartial(plan,cycle,amount){
+  const w={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,date:todayStr(),type:'partial',amount:Math.round(+amount),serviceCharge:0,createdAt:new Date().toISOString()};
+  await put('withdrawals',w);S.withdrawals.push(w);return w;
+}
+async function payout(plan,cycle,{startNew}){
+  const collected=collectedTotal(cycle.id);const partials=partialsTotal(cycle.id);
+  const charge=Math.min(collected,plan.dailyAmount);
+  const pay=Math.max(0,collected-partials-charge);
+  Object.assign(cycle,{status:'completed',serviceCharge:charge,payout:pay,collectedTotal:collected,completedAt:todayStr()});
+  await put('cycles',cycle);
+  const w={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,date:todayStr(),type:'payout',amount:pay,serviceCharge:charge,createdAt:new Date().toISOString()};
+  await put('withdrawals',w);S.withdrawals.push(w);
+  if(startNew)await startCycle(plan); else {plan.status='closed';await put('plans',plan);}
+  return{charge,pay,collected};
+}
+async function deletePlan(plan){
+  for(const c of S.collections.filter(x=>x.planId===plan.id))await del('collections',c.id);
+  for(const w of S.withdrawals.filter(x=>x.planId===plan.id))await del('withdrawals',w.id);
+  for(const cy of S.cycles.filter(x=>x.planId===plan.id))await del('cycles',cy.id);
+  await del('plans',plan.id);
+  S.collections=S.collections.filter(x=>x.planId!==plan.id);
+  S.withdrawals=S.withdrawals.filter(x=>x.planId!==plan.id);
+  S.cycles=S.cycles.filter(x=>x.planId!==plan.id);
+  S.plans=S.plans.filter(x=>x.id!==plan.id);
+}
+async function deleteClient(client){
+  for(const p of clientPlans(client.id))await deletePlan(p);
+  await del('clients',client.id);S.clients=S.clients.filter(x=>x.id!==client.id);
+}
+async function setSetting(k,v){await put('settings',{key:k,value:v});S.settings[k]=v;}
+
+/* ==================================================================
+   UI
+   ================================================================== */
+const $=s=>document.querySelector(s);
+const el=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;};
+let currentScreen='home';
+function toast(msg,kind){const t=$('#toast');t.textContent=msg;t.className='toast show'+(kind?' '+kind:'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',2200);}
+function go(screen){
+  currentScreen=screen;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('#screen-'+screen).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.s===screen));
+  $('#fab').style.display=(screen==='clients')?'grid':'none';
+  window.scrollTo(0,0);render();
+}
+function openSheet(html){$('#sheetBody').innerHTML=html;$('#sheetBg').classList.add('show');$('#sheet').classList.add('show');}
+function closeSheet(){if(typeof closeCamera==='function')closeCamera();$('#sheetBg').classList.remove('show');$('#sheet').classList.remove('show');}
+$('#sheetBg').addEventListener('click',closeSheet);
+
+function render(){
+  ({home:renderHome,clients:renderClients,collect:renderCollect,money:renderMoney,reports:renderReports}[currentScreen]||(()=>{}))();
+}
+
+/* ---------- HOME ---------- */
+function greeting(){const h=new Date().getHours();return h<12?'Good morning':(h<17?'Good afternoon':'Good evening');}
+function renderHome(){
+  const apc=allActivePlanCycles();
+  const nClients=S.clients.filter(c=>c.status==='active').length;
+  const who=S.settings.collector?(', '+S.settings.collector.split(/\s+/)[0]):'';
+  $('#greetHi').textContent=`${greeting()}${who} 👋`;
+  $('#greetSub').textContent="Here's today's collection";
+  $('#greetDate').textContent=niceDate(todayStr());
+  $('#homeHolding').textContent=fmtMoney(totalHolding());
+  $('#homeHoldingMeta').textContent=`across ${apc.length} active plan${apc.length===1?'':'s'}`;
+  $('#homeToday').textContent=fmtMoney(totalCollectedOn(todayStr()));
+  $('#homeClients').textContent=String(nClients);
+  const paid=apc.filter(x=>collectedToday(x.cycle.id)).length;
+  $('#homePaidPill').textContent=`${paid}/${apc.length} today`;
+  $('#homeProfitMonth').textContent=fmtMoney(profitInMonth(monthKey(todayStr())));
+  $('#homeProfitTotal').textContent=fmtMoney(totalProfit());
+
+  const box=$('#homeAttention');box.innerHTML='';
+  const ready=apc.filter(x=>daysCovered(x.cycle.id,x.plan)>=CYCLE_DAYS);
+  const notPaid=apc.filter(x=>daysCovered(x.cycle.id,x.plan)<CYCLE_DAYS&&!collectedToday(x.cycle.id));
+  if(apc.length===0){
+    box.innerHTML=`<div class="empty"><div class="em">🌱</div><h3>Welcome to AFODAN</h3><p>Add your first client to start recording daily savings.</p><div style="height:14px"></div><button class="btn" onclick="openAddClient()">+ Add your first client</button></div>`;return;
+  }
+  if(ready.length===0&&notPaid.length===0){
+    box.innerHTML=`<div class="card" style="text-align:center;color:var(--green)"><div style="font-size:30px">✅</div><div style="font-weight:700;margin-top:4px">All caught up!</div><div style="font-size:13px;color:var(--muted);margin-top:2px">Every plan has been collected today.</div></div>`;return;
+  }
+  ready.forEach(x=>{
+    const c=clientById(x.plan.clientId);
+    const b=el('button','cli');
+    b.innerHTML=`${avatarHTML(c)}
+      <div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(x.plan.label)} · cycle complete</div></div>
+      <div class="rt"><span class="chip done">Pay out ▸</span></div>`;
+    b.onclick=()=>openPayoutSheet(x.plan.id);box.appendChild(b);
+  });
+  if(notPaid.length){
+    const t=el('div','section-title','Not collected today');t.style.marginTop='16px';box.appendChild(t);
+    notPaid.slice(0,6).forEach(x=>{
+      const c=clientById(x.plan.clientId);const dc=daysCovered(x.cycle.id,x.plan);
+      const b=el('button','cli');
+      b.innerHTML=`${avatarHTML(c)}
+        <div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(x.plan.label)} · day ${dc}/${CYCLE_DAYS}</div></div>
+        <div class="rt"><span class="chip due">Due</span></div>`;
+      b.onclick=()=>openCollectSheet(x.plan.id);box.appendChild(b);
+    });
+    if(notPaid.length>6){box.appendChild(el('div','',`<button class="link" style="margin:8px 4px" onclick="go('collect')">See all ${notPaid.length} →</button>`));}
+  }
+}
+
+/* ---------- CLIENTS ---------- */
+let cliFilter='active',cliQuery='';
+function renderClients(){
+  const list=$('#clientList');list.innerHTML='';
+  let items=S.clients.slice();
+  if(cliFilter==='active')items=items.filter(c=>c.status==='active');
+  if(cliFilter==='due')items=items.filter(c=>activePlans(c.id).some(p=>{const cy=activeCycle(p.id);return cy&&!collectedToday(cy.id)&&daysCovered(cy.id,p)<CYCLE_DAYS;}));
+  if(cliQuery){const q=cliQuery.toLowerCase();items=items.filter(c=>(c.name+' '+c.phone+' '+c.business).toLowerCase().includes(q));}
+  items.sort((a,b)=>a.name.localeCompare(b.name));
+  if(items.length===0){list.innerHTML=`<div class="empty"><div class="em">👥</div><h3>No clients yet</h3><p>${cliQuery?'No match for your search.':'Tap the + button to register your first client.'}</p></div>`;return;}
+  items.forEach(c=>{
+    const aps=activePlans(c.id);
+    const bal=clientBalance(c.id);
+    const due=aps.some(p=>{const cy=activeCycle(p.id);return cy&&!collectedToday(cy.id)&&daysCovered(cy.id,p)<CYCLE_DAYS;});
+    const readyN=aps.filter(p=>planReady(p)).length;
+    let chip='';
+    if(c.status!=='active')chip='<span class="chip gray">Inactive</span>';
+    else if(readyN>0)chip=`<span class="chip done">${readyN} ready</span>`;
+    else if(due)chip='<span class="chip due">Due</span>';
+    else if(aps.length)chip='<span class="chip paid">Paid ✓</span>';
+    const planTxt=aps.length?aps.map(p=>fmtMoney(p.dailyAmount)).join(' + ')+'/day':'no active plan';
+    const b=el('button','cli');
+    b.innerHTML=`${avatarHTML(c)}
+      <div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(planTxt)} · ${aps.length} plan${aps.length===1?'':'s'} ${chip}</div></div>
+      <div class="rt"><div class="bal">${fmtMoney(bal)}</div><div class="dcount">balance</div></div>`;
+    b.onclick=()=>openClient(c.id);list.appendChild(b);
+  });
+}
+
+/* ---------- CLIENT DETAIL ---------- */
+function openClient(id){
+  const c=clientById(id);if(!c)return;
+  const aps=clientPlans(c.id);
+  let plansHTML=aps.map(p=>planCardHTML(c,p)).join('');
+  if(aps.length===0)plansHTML=`<div style="text-align:center;color:var(--muted);padding:14px;font-size:13.5px">No plans yet.</div>`;
+  const html=`
+    <div style="display:flex;align-items:center;gap:13px;margin-bottom:6px">
+      ${avatarHTML(c,56)}
+      <div style="min-width:0"><h2 style="margin:0">${esc(c.name)}</h2>
+      <div class="sub" style="margin:0">${c.business?esc(c.business)+' · ':''}${c.phone?esc(c.phone):'no phone'}</div></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px">
+      ${c.phone?`<a class="btn sec sm" href="tel:${esc(c.phone)}" style="text-decoration:none">📞 Call</a><a class="btn sec sm" href="sms:${esc(c.phone)}" style="text-decoration:none">💬 SMS</a><a class="btn sec sm" href="https://wa.me/${esc(c.phone.replace(/[^0-9]/g,''))}" target="_blank" style="text-decoration:none">🟢 WhatsApp</a>`:''}
+    </div>
+    ${c.altPhone?`<div class="sub" style="margin:-6px 0 10px">Alt: ${esc(c.altPhone)}</div>`:''}
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div><div style="font-size:12.5px;color:var(--muted);font-weight:600">Total balance held</div>
+      <div style="font-size:24px;font-weight:800">${fmtMoney(clientBalance(c.id))}</div></div>
+      <div style="text-align:right;font-size:12.5px;color:var(--muted);font-weight:600">${activePlans(c.id).length} active plan(s)</div>
+    </div>
+    <div class="section-title" style="margin-top:6px">Savings plans</div>
+    ${plansHTML}
+    <button class="btn sec" onclick="openAddPlan('${c.id}')">+ Add another plan (different daily amount)</button>
+    <div class="section-title">History</div>
+    <div class="card">${clientHistoryHTML(c)}</div>
+    <div class="btn-row">
+      <button class="btn sec" onclick="openEditClient('${c.id}')">✎ Edit client</button>
+      <button class="btn sec" style="color:var(--red)" onclick="confirmDeleteClient('${c.id}')">🗑 Delete</button>
+    </div>`;
+  openSheet(html);
+}
+function planCardHTML(c,p){
+  const cy=activeCycle(p.id);
+  const collected=cy?collectedTotal(cy.id):0;
+  const partials=cy?partialsTotal(cy.id):0;
+  const bal=cy?cycleBalance(cy.id):0;
+  const dc=cy?daysCovered(cy.id,p):0;
+  const charge=cy?Math.min(collected,p.dailyAmount):0;
+  const proj=Math.max(0,collected-partials-charge);
+  const pct=Math.min(100,Math.round(dc/CYCLE_DAYS*100));
+  const ready=dc>=CYCLE_DAYS;
+  const closed=p.status!=='active';
+  let grid='';for(let i=1;i<=CYCLE_DAYS;i++){grid+=`<div class="${i<=dc?(i===1?'day on charge':'day on'):'day'}">${i}</div>`;}
+  const completed=S.cycles.filter(x=>x.planId===p.id&&x.status==='completed').length;
+  return `<div class="plan-card">
+    <div class="ph">
+      <div><div class="plabel">${esc(p.label)} ${ready?'<span class="chip done">Ready</span>':(closed?'<span class="chip gray">Closed</span>':'')}</div>
+      <div class="pmeta">Card ${esc(p.cardNo||'—')} · rate ${fmtMoney(p.dailyAmount)}/day · day ${dc}/${CYCLE_DAYS}${completed?` · ${completed} completed`:''}</div></div>
+      <div class="pbal">${fmtMoney(bal)}<div class="pmeta" style="font-weight:600">balance</div></div>
+    </div>
+    <div class="prog ${ready?'full':''}"><i style="width:${pct}%"></i></div>
+    <div class="daygrid">${grid}</div>
+    <div style="font-size:11px;color:var(--muted);margin:8px 0 4px">🟨 Day 1 = business service charge (${fmtMoney(p.dailyAmount)}). Client gets ${fmtMoney(proj)} if paid out now.</div>
+    ${closed?'':`<div class="btn-row" style="margin-top:10px">
+      <button class="btn green sm" onclick="openCollectSheet('${p.id}')">📥 Collect</button>
+      <button class="btn sec sm" onclick="openWithdrawSheet('${p.id}')">💸 Withdraw</button>
+      <button class="btn ${ready?'':'sec'} sm" onclick="openPayoutSheet('${p.id}')">🏁 Pay out</button>
+    </div>`}
+    <div style="display:flex;gap:14px;margin-top:10px;align-items:center">
+      <button class="link" onclick="openPassbook('${p.id}')">📗 View passbook</button>
+      ${closed?'':`<button class="link" style="color:var(--red)" onclick="confirmDeletePlan('${p.id}')">Delete plan</button>`}
+    </div>
+  </div>`;
+}
+function clientHistoryHTML(c){
+  const rows=[];
+  S.collections.filter(x=>x.clientId===c.id).forEach(x=>rows.push({date:x.date,ts:x.createdAt,type:'collect',amount:x.amount,planId:x.planId}));
+  S.withdrawals.filter(x=>x.clientId===c.id).forEach(x=>rows.push({date:x.date,ts:x.createdAt,type:x.type,amount:x.amount,charge:x.serviceCharge,planId:x.planId}));
+  rows.sort((a,b)=>(b.ts||'').localeCompare(a.ts||'')||b.date.localeCompare(a.date));
+  if(rows.length===0)return`<div style="text-align:center;color:var(--muted);padding:14px;font-size:13.5px">No transactions yet.</div>`;
+  return rows.slice(0,50).map(r=>{
+    const p=planById(r.planId);const pl=p?' · '+esc(p.label):'';
+    let ic,label,amt;
+    if(r.type==='collect'){ic='📥';label='Collection'+pl;amt='+'+fmtMoney(r.amount);}
+    else if(r.type==='partial'){ic='💸';label='Withdrawal'+pl;amt='−'+fmtMoney(r.amount);}
+    else{ic='🏁';label='Payout'+pl+(r.charge?` · charge ${fmtMoney(r.charge)}`:'');amt='−'+fmtMoney(r.amount);}
+    return `<div class="txn"><div class="ti">${ic}</div><div><div class="tt">${label}</div><div class="ts">${niceDate(r.date)}</div></div><div class="ta">${amt}</div></div>`;
+  }).join('');
+}
+
+/* ---------- PASSBOOK (mirrors the paper Date/Deposit/Withdrawal/Balance book) ---------- */
+function planLedger(p){
+  const rows=[];
+  S.collections.filter(x=>x.planId===p.id).forEach(x=>rows.push({date:x.date,ts:x.createdAt,deposit:x.amount,withdrawal:0,kind:'d'}));
+  S.withdrawals.filter(x=>x.planId===p.id).forEach(x=>rows.push({date:x.date,ts:x.createdAt,deposit:0,withdrawal:x.amount,kind:x.type,charge:x.serviceCharge}));
+  rows.sort((a,b)=>(a.ts||'').localeCompare(b.ts||'')||a.date.localeCompare(b.date));
+  let bal=0;rows.forEach(r=>{bal+=r.deposit-r.withdrawal;r.balance=bal;});
+  return rows;
+}
+function passbookRows(rows){
+  if(!rows.length)return `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:18px">No entries yet</td></tr>`;
+  return rows.map((r,i)=>`<tr>
+    <td>${i+1}</td>
+    <td>${niceDate(r.date)}</td>
+    <td class="num">${r.deposit?fmtMoney(r.deposit).replace(CUR,''):''}</td>
+    <td class="num">${r.withdrawal?fmtMoney(r.withdrawal).replace(CUR,''):''}</td>
+    <td class="num">${fmtMoney(r.balance).replace(CUR,'')}</td>
+    <td style="text-align:center;color:#0f766e">${r.kind==='payout'?'🏁':(r.kind==='partial'?'↩':'✓')}</td>
+  </tr>`).join('');
+}
+function openPassbook(planId){
+  const p=planById(planId);if(!p)return;const c=clientById(p.clientId);
+  const rows=planLedger(p);
+  const totalDep=rows.reduce((s,r)=>s+r.deposit,0);
+  const totalWd=rows.reduce((s,r)=>s+r.withdrawal,0);
+  const bal=rows.length?rows[rows.length-1].balance:0;
+  const html=`
+    <h2>Passbook</h2>
+    <p class="sub">${esc(S.settings.bizName||'AFODAN')} · SUSU PASSBOOK</p>
+    <div class="card" style="margin-bottom:14px;display:flex;gap:12px;align-items:center">
+      ${avatarHTML(c,46)}
+      <div style="min-width:0;flex:1"><div style="font-weight:800">${esc(c.name)}</div>
+      <div class="pmeta">Card ${esc(p.cardNo||'—')} · ${esc(p.label)} · rate ${fmtMoney(p.dailyAmount)}/day</div></div>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--line);border-radius:12px">
+    <table class="pbk">
+      <thead><tr><th>#</th><th>Date</th><th>Deposit</th><th>Withdrawal</th><th>Balance</th><th>Sign</th></tr></thead>
+      <tbody>${passbookRows(rows)}</tbody>
+      <tfoot><tr><td></td><td>Total (${CUR})</td><td class="num">${fmtMoney(totalDep).replace(CUR,'')}</td><td class="num">${fmtMoney(totalWd).replace(CUR,'')}</td><td class="num">${fmtMoney(bal).replace(CUR,'')}</td><td></td></tr></tfoot>
+    </table></div>
+    <div style="height:14px"></div>
+    <button class="btn" onclick="printPassbook('${p.id}')">🖨 Print / Save as PDF</button>
+    <div style="height:8px"></div>
+    <button class="btn sec" onclick="openClient('${c.id}')">Back</button>`;
+  openSheet(html);
+}
+function printPassbook(planId){
+  const p=planById(planId);const c=clientById(p.clientId);const rows=planLedger(p);
+  const totalDep=rows.reduce((s,r)=>s+r.deposit,0),totalWd=rows.reduce((s,r)=>s+r.withdrawal,0);
+  const bal=rows.length?rows[rows.length-1].balance:0;
+  const body=rows.length?rows.map((r,i)=>`<tr><td>${i+1}</td><td>${niceDate(r.date)}</td><td class="n">${r.deposit?fmtMoney(r.deposit).replace(CUR,''):''}</td><td class="n">${r.withdrawal?fmtMoney(r.withdrawal).replace(CUR,''):''}</td><td class="n">${fmtMoney(r.balance).replace(CUR,'')}</td><td></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center">No entries</td></tr>';
+  const doc=`<!doctype html><html><head><meta charset="utf-8"><title>Passbook — ${esc(c.name)}</title>
+  <style>body{font-family:Arial,sans-serif;color:#111;padding:24px}h1{font-size:18px;margin:0}.sub{color:#555;font-size:13px;margin:2px 0 14px}
+  .meta{font-size:13px;margin-bottom:14px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border:1px solid #999;padding:6px 8px;text-align:left}th{background:#f0f0f0}.n{text-align:right}tfoot td{font-weight:bold;background:#fafafa}</style></head>
+  <body><h1>${esc(S.settings.bizName||'AFODAN')}</h1><div class="sub">${[S.settings.bizLoc,S.settings.bizPhone].filter(Boolean).map(esc).join(' · ')||'SUSU PASSBOOK'} — daily savings record</div>
+  <div class="meta"><b>Name:</b> ${esc(c.name)} &nbsp; <b>Card No:</b> ${esc(p.cardNo||'—')} &nbsp; <b>Rate GH₵:</b> ${p.dailyAmount}/day<br>
+  <b>Phone:</b> ${esc(c.phone||'—')} &nbsp; <b>Plan:</b> ${esc(p.label)}</div>
+  <table><thead><tr><th>#</th><th>Date</th><th>Deposit</th><th>Withdrawal</th><th>Balance</th><th>Sign</th></tr></thead>
+  <tbody>${body}</tbody>
+  <tfoot><tr><td></td><td>Total (GH₵)</td><td class="n">${fmtMoney(totalDep).replace(CUR,'')}</td><td class="n">${fmtMoney(totalWd).replace(CUR,'')}</td><td class="n">${fmtMoney(bal).replace(CUR,'')}</td><td></td></tr></tfoot></table>
+  <p style="margin-top:24px;font-size:12px;color:#666">Printed ${niceDate(todayStr())} · ${esc(S.settings.bizName||'AFODAN')}</p>
+  <script>window.onload=function(){window.print();}<\/script></body></html>`;
+  const w=window.open('','_blank');
+  if(w){w.document.write(doc);w.document.close();}
+  else toast('Allow pop-ups to print','bad');
+}
+
+/* ---------- COLLECT sheet (supports lump sums) ---------- */
+function openCollectSheet(planId){
+  const p=planById(planId);if(!p)return;const c=clientById(p.clientId);
+  const cy=activeCycle(p.id);const dc=cy?daysCovered(cy.id,p):0;
+  const already=cy&&collectedToday(cy.id);
+  const html=`
+    <h2>Record collection</h2>
+    <p class="sub">${esc(c.name)} · ${esc(p.label)} · day ${dc}/${CYCLE_DAYS}</p>
+    ${already?`<div class="note-box" style="margin-bottom:14px">✓ Already collected today. You can add another entry if they paid more.</div>`:''}
+    <div class="field"><label>Amount collected</label>
+      <div class="amt-input"><span class="cur">${CUR}</span><input id="colAmt" type="number" inputmode="numeric" value="${p.dailyAmount}"></div>
+      <div class="quick-amts" id="colQuick"></div>
+      <div class="days-readout" id="colDays"></div>
+    </div>
+    <div class="field"><label>Date</label><input id="colDate" type="date" value="${todayStr()}" max="${todayStr()}"></div>
+    <button class="btn green" onclick="submitCollection('${p.id}')">✓ Save collection</button>
+    <div style="height:8px"></div><button class="btn sec" onclick="closeSheet()">Cancel</button>`;
+  openSheet(html);
+  const q=$('#colQuick');
+  [{d:1,a:p.dailyAmount},{d:5,a:p.dailyAmount*5},{d:10,a:p.dailyAmount*10},{d:31,a:p.dailyAmount*31}].forEach((o,i)=>{
+    const btn=el('button',i===0?'on':'',`${o.d}d · ${fmtMoney(o.a)}`);
+    btn.onclick=()=>{$('#colAmt').value=o.a;q.querySelectorAll('button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');updDays();};q.appendChild(btn);});
+  function updDays(){const v=+$('#colAmt').value||0;const d=p.dailyAmount>0?(v/p.dailyAmount):0;
+    $('#colDays').textContent=v>0?`= ${(Math.round(d*10)/10)} day${d===1?'':'s'} of contribution`:'';}
+  $('#colAmt').addEventListener('input',()=>{q.querySelectorAll('button').forEach(x=>x.classList.remove('on'));updDays();});
+  updDays();
+}
+async function submitCollection(planId){
+  const p=planById(planId);const amt=+$('#colAmt').value;const date=$('#colDate').value||todayStr();
+  if(!amt||amt<=0){toast('Enter a valid amount','bad');return;}
+  await recordCollection(p,amt,date);closeSheet();toast('Collection saved','good');render();
+}
+
+/* ---------- WITHDRAW sheet ---------- */
+function openWithdrawSheet(planId){
+  const p=planById(planId);if(!p)return;const c=clientById(p.clientId);const cy=activeCycle(p.id);
+  const bal=cy?cycleBalance(cy.id):0;
+  const html=`
+    <h2>Withdraw savings</h2>
+    <p class="sub">${esc(c.name)} · ${esc(p.label)} · available ${fmtMoney(bal)}</p>
+    <div class="note-box" style="margin-bottom:14px">Partial cash-out during the cycle. The 1-day service charge is only taken when the plan is <b>completed & paid out</b>, not on partial withdrawals.</div>
+    <div class="field"><label>Amount to withdraw</label>
+      <div class="amt-input"><span class="cur">${CUR}</span><input id="wdAmt" type="number" inputmode="numeric" value="${bal>0?bal:''}" max="${bal}"></div>
+      <div class="hint">Cannot exceed the balance of ${fmtMoney(bal)}.</div></div>
+    <button class="btn amber" onclick="submitWithdraw('${p.id}')">💸 Confirm withdrawal</button>
+    <div style="height:8px"></div><button class="btn sec" onclick="closeSheet()">Cancel</button>`;
+  openSheet(html);
+}
+async function submitWithdraw(planId){
+  const p=planById(planId);const cy=activeCycle(p.id);const bal=cy?cycleBalance(cy.id):0;const amt=+$('#wdAmt').value;
+  if(!amt||amt<=0){toast('Enter a valid amount','bad');return;}
+  if(amt>bal){toast('Amount exceeds balance','bad');return;}
+  await recordPartial(p,cy,amt);closeSheet();toast('Withdrawal recorded','good');render();
+}
+
+/* ---------- PAYOUT sheet ---------- */
+function openPayoutSheet(planId){
+  const p=planById(planId);if(!p)return;const c=clientById(p.clientId);const cy=activeCycle(p.id);
+  if(!cy){toast('No active cycle','bad');return;}
+  const collected=collectedTotal(cy.id);const partials=partialsTotal(cy.id);const dc=daysCovered(cy.id,p);
+  const charge=Math.min(collected,p.dailyAmount);const pay=Math.max(0,collected-partials-charge);
+  const html=`
+    <h2>Complete plan & pay out</h2>
+    <p class="sub">${esc(c.name)} · ${esc(p.label)} · ${dc} day${dc===1?'':'s'} collected</p>
+    ${dc<CYCLE_DAYS?`<div class="note-box" style="margin-bottom:14px">⚠ On day ${dc} of ${CYCLE_DAYS}. You can still close early — the business keeps 1 day's contribution as its service charge.</div>`:''}
+    <div class="card" style="margin-bottom:16px">
+      <div class="kv"><span class="k">Total collected</span><span class="v">${fmtMoney(collected)}</span></div>
+      ${partials>0?`<div class="kv"><span class="k">Already withdrawn</span><span class="v neg">−${fmtMoney(partials)}</span></div>`:''}
+      <div class="kv"><span class="k">Service charge (1 day)</span><span class="v charge">−${fmtMoney(charge)}</span></div>
+      <div class="kv"><span class="k">Client receives</span><span class="v big pos">${fmtMoney(pay)}</span></div>
+    </div>
+    <div class="field" style="display:flex;align-items:center;gap:10px;background:var(--soft);padding:12px 14px;border-radius:12px">
+      <input type="checkbox" id="startNew" checked style="width:20px;height:20px">
+      <label for="startNew" style="margin:0;font-weight:600">Start a new 31-day cycle for this plan</label></div>
+    <button class="btn" onclick="submitPayout('${p.id}')">🏁 Pay out ${fmtMoney(pay)}</button>
+    <div style="height:8px"></div><button class="btn sec" onclick="closeSheet()">Cancel</button>`;
+  openSheet(html);
+}
+async function submitPayout(planId){
+  const p=planById(planId);const cy=activeCycle(p.id);const startNew=$('#startNew').checked;
+  const r=await payout(p,cy,{startNew});closeSheet();
+  toast(`Paid ${fmtMoney(r.pay)} · profit ${fmtMoney(r.charge)}`,'good');render();
+}
+
+/* ---------- ADD / EDIT CLIENT & PLAN ---------- */
+function wirePhoto(inputId,prevId){
+  const inp=$('#'+inputId),prev=$('#'+prevId);if(!inp||!prev)return;
+  prev.onclick=()=>inp.click();
+  inp.addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;
+    try{_formPhoto=await fileToThumb(f);prev.style.backgroundImage=`url('${_formPhoto}')`;prev.innerHTML='';}catch(err){toast('Could not load photo','bad');}});
+}
+function photoPickerHTML(){
+  return `<div class="photo-pick">
+    <div class="pp-prev" id="acPhotoPrev" style="${_formPhoto?`background-image:url('${_formPhoto}')`:''}" onclick="openCamera()">${_formPhoto?'':'📷'}</div>
+    <div style="min-width:0"><div style="font-weight:700;font-size:13.5px">Client photo</div>
+    <div class="hint" style="margin:2px 0 4px">Take a photo with the camera or upload one.</div>
+    <div class="pp-btns">
+      <button class="btn sec sm" type="button" onclick="openCamera()">📷 Take photo</button>
+      <button class="btn sec sm" type="button" onclick="document.getElementById('acPhotoInput').click()">🖼 Upload</button>
+    </div></div>
+    <input type="file" id="acPhotoInput" accept="image/*" hidden>
+  </div>`;
+}
+/* ---- in-app camera (getUserMedia) with graceful fallback ---- */
+let _camStream=null,_camFacing='environment';
+async function openCamera(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    toast('Camera not supported — use Upload','bad');document.getElementById('acPhotoInput').click();return;
+  }
+  const ov=document.createElement('div');ov.className='cam-ov';ov.id='camOv';
+  ov.innerHTML=`<div class="cam-guide">Position the client in frame, then tap the shutter</div>
+    <video id="camVid" autoplay playsinline muted></video>
+    <div class="cam-bar">
+      <button class="cam-x" id="camClose">✕</button>
+      <button class="cam-shot" id="camShot" aria-label="Capture"></button>
+      <button class="cam-x" id="camFlip">🔄</button>
+    </div>`;
+  document.body.appendChild(ov);
+  $('#camClose').onclick=closeCamera;$('#camShot').onclick=capturePhoto;$('#camFlip').onclick=flipCamera;
+  await startCam();
+}
+async function startCam(){
+  try{
+    if(_camStream)_camStream.getTracks().forEach(t=>t.stop());
+    _camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:_camFacing,width:{ideal:1280},height:{ideal:1280}},audio:false});
+    const v=$('#camVid');if(v)v.srcObject=_camStream;
+  }catch(e){
+    closeCamera();toast('Could not open camera — use Upload','bad');
+    const inp=document.getElementById('acPhotoInput');if(inp)inp.click();
+  }
+}
+function flipCamera(){_camFacing=_camFacing==='environment'?'user':'environment';startCam();}
+function closeCamera(){
+  if(_camStream){_camStream.getTracks().forEach(t=>t.stop());_camStream=null;}
+  const ov=$('#camOv');if(ov)ov.remove();
+}
+function capturePhoto(){
+  const v=$('#camVid');if(!v||!v.videoWidth){toast('Camera still loading…');return;}
+  const s=Math.min(v.videoWidth,v.videoHeight),size=360;
+  const cv=document.createElement('canvas');cv.width=cv.height=size;
+  const ctx=cv.getContext('2d');
+  if(_camFacing==='user'){ctx.translate(size,0);ctx.scale(-1,1);} // un-mirror selfie
+  ctx.drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,size,size);
+  _formPhoto=cv.toDataURL('image/jpeg',0.82);
+  const prev=$('#acPhotoPrev');if(prev){prev.style.backgroundImage=`url('${_formPhoto}')`;prev.innerHTML='';}
+  closeCamera();toast('Photo captured ✓','good');
+}
+function openAddClient(){
+  _formPhoto='';
+  const html=`
+    <h2>New client</h2><p class="sub">Register a client and their first savings plan.</p>
+    ${photoPickerHTML()}
+    <div class="field"><label>Full name *</label><input id="acName" placeholder="e.g. Ama Mensah" autocomplete="off"></div>
+    <div class="field"><label>Phone / contact</label><input id="acPhone" type="tel" placeholder="e.g. 024 123 4567"></div>
+    <div class="field"><label>Alternate phone</label><input id="acAlt" type="tel" placeholder="Optional — next of kin, etc."></div>
+    <div class="field"><label>Business / shop</label><input id="acBiz" placeholder="e.g. Ama's Provisions, Kantamanto"></div>
+    <div class="divider"></div>
+    <div class="field"><label>First plan — daily rate *</label>
+      <div class="amt-input"><span class="cur">${CUR}</span><input id="acAmt" type="number" inputmode="numeric" placeholder="0"></div>
+      <div class="hint">The fixed amount saved each day (the card "Rate"). Add more plans (e.g. GH₵20/day + GH₵50/day) later.</div></div>
+    <div class="field"><label>Card No</label><input id="acCard" placeholder="Auto (${nextCardNo()}) — or enter card number"></div>
+    <div class="field"><label>Plan label</label><input id="acLabel" placeholder="Optional — e.g. Main card"></div>
+    <div class="field"><label>Note</label><textarea id="acNote" rows="2" placeholder="Optional — location, landmark…"></textarea></div>
+    <button class="btn" onclick="submitAddClient()">✓ Register client</button>
+    <div style="height:8px"></div><button class="btn sec" onclick="closeSheet()">Cancel</button>`;
+  openSheet(html);wirePhoto('acPhotoInput','acPhotoPrev');setTimeout(()=>$('#acName')&&$('#acName').focus(),260);
+}
+async function submitAddClient(){
+  const name=$('#acName').value.trim();const amt=+$('#acAmt').value;
+  if(!name){toast('Enter a name','bad');return;}
+  if(!amt||amt<=0){toast('Enter a daily rate','bad');return;}
+  await addClient({name,phone:$('#acPhone').value,altPhone:$('#acAlt').value,business:$('#acBiz').value,note:$('#acNote').value,
+    photo:_formPhoto,dailyAmount:amt,planLabel:$('#acLabel').value,cardNo:$('#acCard').value});
+  _formPhoto='';closeSheet();toast('Client registered ✓','good');go('clients');
+}
+function openAddPlan(clientId){
+  const c=clientById(clientId);
+  const html=`
+    <h2>Add savings plan</h2><p class="sub">${esc(c.name)} — a separate daily rate with its own 31-day card.</p>
+    <div class="field"><label>Daily rate *</label>
+      <div class="amt-input"><span class="cur">${CUR}</span><input id="apAmt" type="number" inputmode="numeric" placeholder="0"></div>
+      <div class="hint">e.g. a second plan at GH₵50/day alongside their GH₵20/day plan.</div></div>
+    <div class="field"><label>Card No</label><input id="apCard" placeholder="Auto (${nextCardNo()}) — or enter card number"></div>
+    <div class="field"><label>Plan label</label><input id="apLabel" placeholder="Optional — e.g. Rent savings"></div>
+    <button class="btn" onclick="submitAddPlan('${clientId}')">✓ Add plan</button>
+    <div style="height:8px"></div><button class="btn sec" onclick="openClient('${clientId}')">Back</button>`;
+  openSheet(html);
+}
+async function submitAddPlan(clientId){
+  const amt=+$('#apAmt').value;if(!amt||amt<=0){toast('Enter a daily rate','bad');return;}
+  await addPlan(clientId,{label:$('#apLabel').value,dailyAmount:amt,cardNo:$('#apCard').value});
+  toast('Plan added ✓','good');openClient(clientId);render();
+}
+function openEditClient(id){
+  const c=clientById(id);if(!c)return;
+  _formPhoto=c.photo||'';
+  const html=`
+    <h2>Edit client</h2>
+    ${photoPickerHTML()}
+    <div class="field"><label>Full name *</label><input id="ecName" value="${esc(c.name)}"></div>
+    <div class="field"><label>Phone / contact</label><input id="ecPhone" type="tel" value="${esc(c.phone)}"></div>
+    <div class="field"><label>Alternate phone</label><input id="ecAlt" type="tel" value="${esc(c.altPhone||'')}"></div>
+    <div class="field"><label>Business / shop</label><input id="ecBiz" value="${esc(c.business)}"></div>
+    <div class="field"><label>Status</label><select id="ecStatus"><option value="active"${c.status==='active'?' selected':''}>Active</option><option value="inactive"${c.status==='inactive'?' selected':''}>Inactive</option></select></div>
+    <div class="field"><label>Note</label><textarea id="ecNote" rows="2">${esc(c.note)}</textarea></div>
+    <button class="btn" onclick="submitEditClient('${c.id}')">✓ Save changes</button>
+    <div style="height:8px"></div>
+    ${c.photo?`<button class="btn sec" onclick="removePhoto('${c.id}')">Remove photo</button><div style="height:8px"></div>`:''}
+    <button class="btn sec" onclick="openClient('${c.id}')">Back</button>`;
+  openSheet(html);wirePhoto('acPhotoInput','acPhotoPrev');
+}
+async function removePhoto(id){const c=clientById(id);c.photo='';_formPhoto='';await put('clients',c);toast('Photo removed');openEditClient(id);}
+async function submitEditClient(id){
+  const c=clientById(id);const name=$('#ecName').value.trim();
+  if(!name){toast('Enter a name','bad');return;}
+  Object.assign(c,{name,phone:$('#ecPhone').value.trim(),altPhone:$('#ecAlt').value.trim(),business:$('#ecBiz').value.trim(),status:$('#ecStatus').value,note:$('#ecNote').value.trim(),photo:_formPhoto||''});
+  await put('clients',c);_formPhoto='';closeSheet();toast('Saved','good');render();
+}
+function confirmDeleteClient(id){
+  const c=clientById(id);if(!c)return;
+  openSheet(`<h2>Delete client?</h2><p class="sub">Permanently removes ${esc(c.name)}, all their plans and records. Cannot be undone.</p>
+    <button class="btn red" onclick="doDeleteClient('${c.id}')">🗑 Yes, delete</button>
+    <div style="height:8px"></div><button class="btn sec" onclick="openClient('${c.id}')">Cancel</button>`);
+}
+async function doDeleteClient(id){await deleteClient(clientById(id));closeSheet();toast('Client deleted');go('clients');}
+function confirmDeletePlan(id){
+  const p=planById(id);if(!p)return;const c=clientById(p.clientId);
+  openSheet(`<h2>Delete plan?</h2><p class="sub">Removes the ${esc(p.label)} plan and its records for ${esc(c.name)}. Cannot be undone.</p>
+    <button class="btn red" onclick="doDeletePlan('${p.id}')">🗑 Yes, delete plan</button>
+    <div style="height:8px"></div><button class="btn sec" onclick="openClient('${p.clientId}')">Cancel</button>`);
+}
+async function doDeletePlan(id){const p=planById(id);const cid=p.clientId;await deletePlan(p);toast('Plan deleted');openClient(cid);render();}
+
+/* ---------- COLLECT screen ---------- */
+let collectFilter='due';
+function renderCollect(){
+  $('#collectDate').textContent=niceDate(todayStr());
+  $('#collectTotal').textContent=fmtMoney(totalCollectedOn(todayStr()));
+  const apc=allActivePlanCycles();
+  const due=apc.filter(x=>!collectedToday(x.cycle.id));
+  $('#collectRemain').textContent=`${due.length} plan${due.length===1?'':'s'}`;
+  const list=$('#collectList');list.innerHTML='';
+  let items=apc.filter(x=>collectFilter==='done'?collectedToday(x.cycle.id):!collectedToday(x.cycle.id));
+  items.sort((a,b)=>clientById(a.plan.clientId).name.localeCompare(clientById(b.plan.clientId).name));
+  if(items.length===0){
+    list.innerHTML=`<div class="empty"><div class="em">${collectFilter==='due'?'✅':'📭'}</div><h3>${collectFilter==='due'?'All collected!':'Nothing here yet'}</h3><p>${collectFilter==='due'?'Every active plan has been collected today.':'Collections you record today will show here.'}</p></div>`;return;}
+  items.forEach(x=>{
+    const c=clientById(x.plan.clientId);const dc=daysCovered(x.cycle.id,x.plan);const done=collectedToday(x.cycle.id);
+    const b=el('div','cli');
+    b.innerHTML=`${avatarHTML(c)}
+      <div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(x.plan.label)} · ${fmtMoney(x.plan.dailyAmount)}/day · day ${dc}/${CYCLE_DAYS}</div></div>
+      <div class="rt"></div>`;
+    const rt=b.querySelector('.rt');
+    if(done){rt.innerHTML='<span class="chip paid">Paid ✓</span>';b.onclick=()=>openCollectSheet(x.plan.id);}
+    else{const btn=el('button','btn green sm','+ '+fmtMoney(x.plan.dailyAmount));btn.onclick=(e)=>{e.stopPropagation();quickCollect(x.plan.id);};rt.appendChild(btn);b.onclick=()=>openCollectSheet(x.plan.id);}
+    list.appendChild(b);
+  });
+}
+async function quickCollect(planId){
+  const p=planById(planId);await recordCollection(p,p.dailyAmount,todayStr());
+  toast(`${esc(clientById(p.clientId).name)}: +${fmtMoney(p.dailyAmount)}`,'good');render();
+}
+
+/* ---------- MONEY screen ---------- */
+let moneyFilter='ready';
+function renderMoney(){
+  const list=$('#moneyList');list.innerHTML='';
+  let items=allActivePlanCycles();
+  if(moneyFilter==='ready')items=items.filter(x=>daysCovered(x.cycle.id,x.plan)>=CYCLE_DAYS);
+  items.sort((a,b)=>daysCovered(b.cycle.id,b.plan)-daysCovered(a.cycle.id,a.plan));
+  if(items.length===0){
+    list.innerHTML=`<div class="empty"><div class="em">⏳</div><h3>No one's ready yet</h3><p>Plans appear here once they reach ${CYCLE_DAYS} days. You can still pay out early from any client's page.</p></div>`;return;}
+  items.forEach(x=>{
+    const c=clientById(x.plan.clientId);const dc=daysCovered(x.cycle.id,x.plan);const bal=cycleBalance(x.cycle.id);const ready=dc>=CYCLE_DAYS;
+    const b=el('div','cli');
+    b.innerHTML=`${avatarHTML(c)}
+      <div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(x.plan.label)} · day ${dc}/${CYCLE_DAYS} · ${fmtMoney(bal)} ${ready?'<span class="chip done">Ready</span>':''}</div></div>
+      <div class="rt"></div>`;
+    const rt=b.querySelector('.rt');
+    const btn=el('button','btn sm '+(ready?'':'sec'),ready?'Pay out':'Withdraw');
+    btn.onclick=(e)=>{e.stopPropagation();ready?openPayoutSheet(x.plan.id):openWithdrawSheet(x.plan.id);};
+    rt.appendChild(btn);b.onclick=()=>openClient(c.id);list.appendChild(b);
+  });
+}
+
+/* ---------- REPORTS ---------- */
+function renderReports(){
+  const done=S.cycles.filter(c=>c.status==='completed');
+  $('#repProfit').textContent=fmtMoney(totalProfit());
+  $('#repProfitMeta').textContent=`from ${done.length} completed plan cycle${done.length===1?'':'s'}`;
+  const months=[];const now=new Date();
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));}
+  const vals=months.map(mk=>profitInMonth(mk));const max=Math.max(1,...vals);
+  const moNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  $('#repChart').innerHTML=months.map((mk,i)=>{
+    const h=Math.round(vals[i]/max*100);const lbl=moNames[+mk.split('-')[1]-1];
+    return `<div class="b"><div class="bv">${vals[i]?fmtMoney(vals[i]).replace(CUR,''):''}</div><i style="height:${vals[i]?Math.max(6,h):2}%"></i><div class="bl">${lbl}</div></div>`;}).join('');
+  const totalCollectedAll=S.collections.reduce((s,c)=>s+c.amount,0);
+  const totalPaidOut=S.withdrawals.reduce((s,w)=>s+w.amount,0);
+  $('#repOverview').innerHTML=`
+    <div class="kv"><span class="k">Total savings held now</span><span class="v">${fmtMoney(totalHolding())}</span></div>
+    <div class="kv"><span class="k">Active clients / plans</span><span class="v">${S.clients.filter(c=>c.status==='active').length} / ${S.plans.filter(p=>p.status==='active').length}</span></div>
+    <div class="kv"><span class="k">All-time collected</span><span class="v">${fmtMoney(totalCollectedAll)}</span></div>
+    <div class="kv"><span class="k">All-time paid out</span><span class="v">${fmtMoney(totalPaidOut)}</span></div>
+    <div class="kv"><span class="k">Completed cycles</span><span class="v">${done.length}</span></div>
+    <div class="kv"><span class="k">Total profit</span><span class="v pos">${fmtMoney(totalProfit())}</span></div>`;
+  const payouts=S.withdrawals.filter(w=>w.type==='payout').sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  const box=$('#repPayouts');
+  if(payouts.length===0)box.innerHTML=`<div style="text-align:center;color:var(--muted);padding:14px;font-size:13.5px">No payouts yet.</div>`;
+  else box.innerHTML=payouts.slice(0,15).map(w=>{const c=clientById(w.clientId);const p=planById(w.planId);
+    return `<div class="txn"><div class="ti">🏁</div><div><div class="tt">${c?esc(c.name):'—'}${p?' · '+esc(p.label):''}</div><div class="ts">${niceDate(w.date)} · charge ${fmtMoney(w.serviceCharge)}</div></div><div class="ta">${fmtMoney(w.amount)}</div></div>`;}).join('');
+}
+
+/* ---------- SETTINGS ---------- */
+function openSettings(){
+  openSheet(`
+    <h2>Settings</h2>
+    <div class="field"><label>Business name</label><input id="setBiz" value="${esc(S.settings.bizName||'AFODAN')}"></div>
+    <div class="field"><label>Your name (collector)</label><input id="setCollector" value="${esc(S.settings.collector||'')}" placeholder="Optional"></div>
+    <div class="field"><label>Business phone</label><input id="setPhone" value="${esc(S.settings.bizPhone||'')}" placeholder="Optional — shown on printed passbook"></div>
+    <div class="field"><label>Business location</label><input id="setLoc" value="${esc(S.settings.bizLoc||'')}" placeholder="Optional — e.g. Kantamanto, shed 101"></div>
+    <button class="btn" onclick="submitSettings()">✓ Save</button>
+    <div class="divider"></div>
+    <div style="font-size:12.5px;color:var(--muted);line-height:1.6"><b>How it works</b><br>
+      • Each client can hold several plans (e.g. GH₵20/day + GH₵50/day).<br>
+      • Each plan runs ${CYCLE_DAYS} days; the business keeps 1 day's contribution as service charge at payout.<br>
+      • Collections accept any amount — a lump sum covers several days automatically.<br>
+      • All data stays privately on this device and works offline.</div>
+    <div class="divider"></div>
+    <button class="btn sec" onclick="exportData()">⬇ Backup data to file</button>
+    <div style="height:8px"></div>
+    <div style="font-size:11.5px;color:var(--muted);text-align:center">AFODAN · v1.0 · offline PWA</div>`);
+}
+async function submitSettings(){
+  await setSetting('bizName',$('#setBiz').value.trim()||'AFODAN');
+  await setSetting('collector',$('#setCollector').value.trim());
+  await setSetting('bizPhone',$('#setPhone').value.trim());
+  await setSetting('bizLoc',$('#setLoc').value.trim());
+  applyBranding();closeSheet();toast('Settings saved','good');
+}
+function applyBranding(){
+  $('#bizName').textContent=S.settings.bizName||'AFODAN';
+  $('#headSub').textContent=S.settings.collector?('Collector: '+S.settings.collector):'Daily savings manager';
+  document.title=S.settings.bizName||'AFODAN';
+}
+
+/* ---------- EXPORT / IMPORT ---------- */
+function exportData(){
+  const dump={app:'susu-collect',version:2,exportedAt:new Date().toISOString(),
+    clients:S.clients,plans:S.plans,cycles:S.cycles,collections:S.collections,withdrawals:S.withdrawals,
+    settings:Object.entries(S.settings).map(([key,value])=>({key,value}))};
+  const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='susu-backup-'+todayStr()+'.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Backup downloaded','good');
+}
+async function importData(file){
+  try{
+    const d=JSON.parse(await file.text());
+    if(!d.clients){toast('Not a valid backup','bad');return;}
+    for(const s of['clients','plans','cycles','collections','withdrawals','settings'])
+      for(const row of(d[s]||[]))await put(s,row);
+    await loadAll();applyBranding();render();toast('Backup restored ✓','good');
+  }catch(e){toast('Could not read file','bad');}
+}
+
+/* ---------- events ---------- */
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.s);});
+$('#fab').addEventListener('click',openAddClient);
+$('#btnAddClient2').addEventListener('click',openAddClient);
+$('#btnSettings').addEventListener('click',openSettings);
+$('#homeGoCollect').addEventListener('click',()=>go('collect'));
+$('#homeQacts').addEventListener('click',e=>{const b=e.target.closest('.qact');if(!b)return;const a=b.dataset.act;if(a==='add')openAddClient();else go(a);});
+$('#cliSearch').addEventListener('input',e=>{cliQuery=e.target.value;renderClients();});
+$('#cliSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;cliFilter=b.dataset.f;$('#cliSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderClients();});
+$('#collectSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;collectFilter=b.dataset.f;$('#collectSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderCollect();});
+$('#moneySeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;moneyFilter=b.dataset.f;$('#moneySeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderMoney();});
+$('#btnExport').addEventListener('click',exportData);
+$('#btnImport').addEventListener('click',()=>$('#importFile').click());
+$('#importFile').addEventListener('change',e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value='';});
+function updateOnline(){$('#offlinePill').classList.toggle('show',!navigator.onLine);}
+window.addEventListener('online',updateOnline);window.addEventListener('offline',updateOnline);
+
+/* ---------- boot ---------- */
+(async function(){
+  try{await openDB();await loadAll();applyBranding();updateOnline();go('home');}
+  catch(e){document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:sans-serif"><h2>Storage unavailable</h2><p>This app needs on-device storage (IndexedDB). Please open it in a normal browser tab, not private mode.</p><p style="color:#888;font-size:13px">'+esc(e.message||e)+'</p></div>';}
+})();
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));}
+</script>
+</body>
+</html>
