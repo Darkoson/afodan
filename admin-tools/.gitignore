@@ -1,0 +1,3 @@
+# NEVER commit these — the service-account key is a master credential to your project
+serviceAccountKey.json
+node_modules/

@@ -1,0 +1,9 @@
+{
+  "name": "afodan-admin-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Admin-only command-line tools for AFODAN (password reset).",
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

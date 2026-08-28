@@ -1400,6 +1400,7 @@ function openManageUser(id){
       </select>${self?'<div class="hint">You cannot change your own role.</div>':''}</div>
     <button class="btn" onclick="saveUserRole('${u.id}')" ${self?'disabled':''}>Save role</button>
     <div class="divider"></div>
+    ${self?'':`<div class="note-box" style="margin-bottom:14px">🔑 To reset ${esc(u.name)}'s password, run the admin tool on your computer:<br><b>node reset-password.js ${esc(u.username)} newPassword</b> &nbsp;(see the admin-tools folder).</div>`}
     ${self?'<div class="note-box">You cannot block your own account.</div>':(u.status==='blocked'
       ?`<button class="btn green" onclick="doBlock('${u.id}','active')">✓ Unblock account</button>`
       :`<button class="btn red" onclick="doBlock('${u.id}','blocked')">🚫 Block account</button>`)}
