@@ -220,6 +220,37 @@
   .cam-shot{width:70px;height:70px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.35)}
   .cam-shot:active{transform:scale(.93)}
   .cam-x{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:19px;display:grid;place-items:center}
+  /* ---- login ---- */
+  body:not(.authed) .app-header,body:not(.authed) .nav,body:not(.authed) .fab{display:none!important}
+  #login{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:linear-gradient(150deg,#4f46e5 0%,#4338ca 45%,#312e81 100%)}
+  #login.show{display:flex}
+  .login-card{position:relative;width:100%;max-width:380px;background:#fff;border-radius:26px;padding:0 26px 24px;box-shadow:0 30px 70px rgba(0,0,0,.4);overflow:hidden;animation:fade .3s ease}
+  .login-blob{position:relative;margin:0 -26px 6px;min-height:148px;background:linear-gradient(135deg,var(--brand),var(--brand-l));border-bottom-left-radius:56% 44px;color:#fff;padding:34px 26px 26px}
+  .login-blob::after{content:"";position:absolute;right:-34px;top:-46px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.13)}
+  .lb-welcome{font-size:14px;opacity:.92;font-weight:600;position:relative;z-index:1}
+  .lb-title{font-size:31px;font-weight:800;letter-spacing:-.6px;margin-top:2px;position:relative;z-index:1}
+  .login-brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.5px;margin:16px 0 20px;color:var(--ink);font-size:15px}
+  .lg-field{margin-bottom:18px}
+  .lg-field>label{display:block;font-size:11px;font-weight:800;letter-spacing:.7px;color:var(--muted);margin-bottom:5px}
+  .lg-field input{width:100%;padding:11px 2px;border:none;border-bottom:2px solid var(--line);font-size:16px;font-weight:600;background:transparent;color:var(--ink);transition:border-color .15s}
+  .lg-field input:focus{outline:none;border-color:var(--brand)}
+  .lg-pass{position:relative;display:flex;align-items:center}
+  .lg-pass input{flex:1;padding-right:34px}
+  #loginToggle{position:absolute;right:0;color:var(--muted);font-size:16px;padding:6px;background:none}
+  .lg-err{color:var(--red);font-size:13px;font-weight:600;min-height:18px;margin:-6px 0 6px}
+  .lg-btn{margin-top:4px;border-radius:14px;background:linear-gradient(135deg,var(--brand),var(--brand-l));box-shadow:0 10px 24px rgba(79,70,229,.42)}
+  .lg-hint{text-align:center;font-size:12px;color:var(--muted);margin-top:16px;line-height:1.5}
+  /* ---- role badges / statuses ---- */
+  .rolechip{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:999px;vertical-align:middle}
+  .rolechip.admin{background:#fce7f3;color:#be185d}.rolechip.manager{background:#ede9fe;color:#6d28d9}.rolechip.collector{background:#dcfce7;color:#15803d}
+  .status-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px}
+  .status-badge.open{background:var(--soft);color:var(--muted)}
+  .status-badge.submitted{background:#fef3c7;color:#b45309}
+  .status-badge.approved{background:#dcfce7;color:#15803d}
+  .status-badge.blocked{background:#fee2e2;color:#b91c1c}
+  .role-card{background:linear-gradient(135deg,#eef2ff,#faf5ff);border:1px solid #e5e7ff;border-radius:18px;padding:16px;margin-bottom:12px}
+  .role-card .rc-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .role-card h4{margin:0;font-size:15px;font-weight:800}
 </style>
 </head>
 <body>
@@ -263,6 +294,7 @@
     <div class="stat"><div class="ic p">📈</div><div class="lbl">Profit this month</div><div class="val" id="homeProfitMonth">GH₵0</div></div>
     <div class="stat"><div class="ic b">🏆</div><div class="lbl">Total profit</div><div class="val" id="homeProfitTotal">GH₵0</div></div>
   </div>
+  <div id="homeRole"></div>
   <div class="row-between"><h3 class="blk">Needs attention</h3><span class="pill-ghost" id="homePaidPill">0/0 today</span></div>
   <div id="homeAttention"></div>
 </main>
@@ -325,6 +357,22 @@
   <input type="file" id="importFile" accept="application/json" hidden>
 </main>
 
+<!-- APPROVALS (managers/admin) -->
+<main class="screen" id="screen-approvals">
+  <div class="list-hdr"><h2>Approvals</h2><button class="btn sm sec" onclick="go('home')">‹ Back</button></div>
+  <div class="note-box" style="margin-bottom:14px">Review a collector's submitted day, physically confirm the cash matches, then approve to close it. Once approved, those records are locked and cannot be deleted.</div>
+  <div class="section-title" style="margin-top:2px">Awaiting your approval</div>
+  <div id="apprPending"></div>
+  <div class="section-title">Recently approved</div>
+  <div id="apprDone"></div>
+</main>
+
+<!-- USERS (admin) -->
+<main class="screen" id="screen-users">
+  <div class="list-hdr"><h2>Users</h2><div style="display:flex;gap:8px"><button class="btn sm sec" onclick="go('home')">‹ Back</button><button class="btn sm" onclick="openAddUser()">+ Add</button></div></div>
+  <div id="usersList"></div>
+</main>
+
 <button class="fab" id="fab">+</button>
 
 <nav class="nav" id="nav">
@@ -338,6 +386,20 @@
 <div class="sheet-bg" id="sheetBg"></div>
 <div class="sheet" id="sheet"><div class="grip"></div><div id="sheetBody"></div></div>
 <div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-card">
+    <div class="login-blob"><div class="lb-welcome">Welcome back,</div><div class="lb-title">Log In!</div></div>
+    <div class="login-brand"><span class="logo-dot">A</span> AFODAN</div>
+    <form id="loginForm" autocomplete="on">
+      <div class="lg-field"><label>USERNAME</label><input id="loginUser" autocapitalize="none" autocomplete="username" placeholder="Enter your username"></div>
+      <div class="lg-field"><label>PASSWORD</label><div class="lg-pass"><input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter your password"><button type="button" id="loginToggle" aria-label="Show password">👁</button></div></div>
+      <div class="lg-err" id="loginErr"></div>
+      <button class="btn lg-btn" type="submit">Log in</button>
+    </form>
+  </div>
+</div>
 
 <script>
 /* ==================================================================
@@ -353,7 +415,7 @@ const CYCLE_DAYS = 31;
 const CUR = 'GH₵';
 
 /* ---------- IndexedDB ---------- */
-const DB_NAME='susu_db', DB_VER=2;
+const DB_NAME='susu_db', DB_VER=3;
 let _db=null;
 function openDB(){
   return new Promise((res,rej)=>{
@@ -361,11 +423,13 @@ function openDB(){
     r.onupgradeneeded=e=>{
       const db=e.target.result;
       const mk=(n,idx)=>{if(!db.objectStoreNames.contains(n)){const s=db.createObjectStore(n,{keyPath:'id'});(idx||[]).forEach(i=>s.createIndex(i,i));}};
-      mk('clients');
+      mk('clients',['ownerId']);
       mk('plans',['clientId']);
       mk('cycles',['clientId','planId']);
-      mk('collections',['clientId','planId','cycleId','date']);
+      mk('collections',['clientId','planId','cycleId','date','collectorId']);
       mk('withdrawals',['clientId','planId','cycleId']);
+      mk('users',['username']);
+      mk('closures',['collectorId','date','status']);
       if(!db.objectStoreNames.contains('settings'))db.createObjectStore('settings',{keyPath:'key'});
     };
     r.onsuccess=e=>{_db=e.target.result;res(_db);};
@@ -395,11 +459,11 @@ function nextCardNo(){let m=0;S.plans.forEach(p=>{const n=parseInt(p.cardNo,10);
 let _formPhoto='';
 
 /* ---------- cache ---------- */
-let S={clients:[],plans:[],cycles:[],collections:[],withdrawals:[],settings:{}};
+let S={clients:[],plans:[],cycles:[],collections:[],withdrawals:[],users:[],closures:[],settings:{}};
 async function loadAll(){
-  const[clients,plans,cycles,collections,withdrawals,settingsArr]=await Promise.all([
-    getAll('clients'),getAll('plans'),getAll('cycles'),getAll('collections'),getAll('withdrawals'),getAll('settings')]);
-  Object.assign(S,{clients,plans,cycles,collections,withdrawals});
+  const[clients,plans,cycles,collections,withdrawals,users,closures,settingsArr]=await Promise.all([
+    getAll('clients'),getAll('plans'),getAll('cycles'),getAll('collections'),getAll('withdrawals'),getAll('users'),getAll('closures'),getAll('settings')]);
+  Object.assign(S,{clients,plans,cycles,collections,withdrawals,users,closures});
   S.settings={};settingsArr.forEach(x=>S.settings[x.key]=x.value);
 }
 
@@ -420,18 +484,18 @@ function serviceCharge(cyId,plan){return Math.min(collectedTotal(cyId),plan.dail
 function collectedToday(cyId){return cycleCollections(cyId).some(c=>c.date===todayStr());}
 function planReady(plan){const cy=activeCycle(plan.id);return cy&&daysCovered(cy.id,plan)>=CYCLE_DAYS;}
 
-// aggregates
-function allActivePlanCycles(){return S.plans.filter(p=>p.status==='active').map(p=>({plan:p,cycle:activeCycle(p.id)})).filter(x=>x.cycle);}
+// aggregates (scope-aware: collectors see only their own; managers/admin see all)
+function allActivePlanCycles(){const sc=scopeSet();return S.plans.filter(p=>p.status==='active'&&sc.has(p.clientId)).map(p=>({plan:p,cycle:activeCycle(p.id)})).filter(x=>x.cycle);}
 function totalHolding(){return allActivePlanCycles().reduce((s,x)=>s+cycleBalance(x.cycle.id),0);}
 function clientBalance(cid){return activePlans(cid).reduce((s,p)=>{const cy=activeCycle(p.id);return s+(cy?cycleBalance(cy.id):0);},0);}
-function totalCollectedOn(dateStr){return S.collections.filter(c=>c.date===dateStr).reduce((s,c)=>s+c.amount,0);}
-function totalProfit(){return S.cycles.filter(c=>c.status==='completed').reduce((s,c)=>s+(c.serviceCharge||0),0);}
-function profitInMonth(mk){return S.cycles.filter(c=>c.status==='completed'&&monthKey(c.completedAt)===mk).reduce((s,c)=>s+(c.serviceCharge||0),0);}
+function totalCollectedOn(dateStr){const sc=scopeSet();return S.collections.filter(c=>c.date===dateStr&&sc.has(c.clientId)).reduce((s,c)=>s+c.amount,0);}
+function totalProfit(){const sc=scopeSet();return S.cycles.filter(c=>c.status==='completed'&&sc.has(c.clientId)).reduce((s,c)=>s+(c.serviceCharge||0),0);}
+function profitInMonth(mk){const sc=scopeSet();return S.cycles.filter(c=>c.status==='completed'&&monthKey(c.completedAt)===mk&&sc.has(c.clientId)).reduce((s,c)=>s+(c.serviceCharge||0),0);}
 
 /* ---------- mutations ---------- */
 async function addClient(data){
   const now=new Date().toISOString();
-  const client={id:uid(),name:data.name.trim(),phone:(data.phone||'').trim(),altPhone:(data.altPhone||'').trim(),business:(data.business||'').trim(),note:(data.note||'').trim(),photo:data.photo||'',status:'active',createdAt:now};
+  const client={id:uid(),ownerId:(AUTH.user&&AUTH.user.id)||null,name:data.name.trim(),phone:(data.phone||'').trim(),altPhone:(data.altPhone||'').trim(),business:(data.business||'').trim(),note:(data.note||'').trim(),photo:data.photo||'',status:'active',createdAt:now};
   await put('clients',client);S.clients.push(client);
   await addPlan(client.id,{label:data.planLabel,dailyAmount:data.dailyAmount,cardNo:data.cardNo});
   return client;
@@ -450,8 +514,12 @@ async function startCycle(plan){
   return cycle;
 }
 async function recordCollection(plan,amount,dateStr){
+  const date=dateStr||todayStr();
+  const client=clientById(plan.clientId);
+  const collectorId=(client&&client.ownerId)||(AUTH.user&&AUTH.user.id)||null;
+  if(closureStatus(collectorId,date)==='approved'){toast('That day is approved & closed — records are locked','bad');return null;}
   let cycle=activeCycle(plan.id);if(!cycle)cycle=await startCycle(plan);
-  const c={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,date:dateStr||todayStr(),amount:Math.round(+amount),createdAt:new Date().toISOString()};
+  const c={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,collectorId,recordedBy:(AUTH.user&&AUTH.user.id)||null,date,amount:Math.round(+amount),createdAt:new Date().toISOString()};
   await put('collections',c);S.collections.push(c);
   return c;
 }
@@ -487,6 +555,94 @@ async function deleteClient(client){
 async function setSetting(k,v){await put('settings',{key:k,value:v});S.settings[k]=v;}
 
 /* ==================================================================
+   AUTH · ROLES · DAILY-APPROVAL   (Phase 1 — local; Phase 2 syncs via backend)
+   Roles: admin (user & platform mgmt), manager (collect + approve others),
+   collector (collect own). Approving a day locks its records (no delete).
+   ================================================================== */
+const AUTH={user:null};
+const DEFAULT_PW='afodan123';
+async function sha256(str){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function seedUsers(){
+  if(S.users.length)return;
+  const pw=await sha256(DEFAULT_PW);const now=new Date().toISOString();
+  const seed=[
+    {id:uid(),name:'Daniel',username:'daniel',role:'manager',pass:pw,status:'active',createdAt:now},
+    {id:uid(),name:'Afoako',username:'afoako',role:'manager',pass:pw,status:'active',createdAt:now},
+    {id:uid(),name:'Administrator',username:'admin',role:'admin',pass:pw,status:'active',createdAt:now}];
+  for(const u of seed){await put('users',u);S.users.push(u);}
+}
+async function migrateOwnership(){ // give pre-auth clients to the first manager so nothing is orphaned
+  const mgr=S.users.find(u=>u.role==='manager')||S.users[0];if(!mgr)return;
+  for(const c of S.clients){if(!c.ownerId){c.ownerId=mgr.id;await put('clients',c);}}
+}
+const userByUsername=u=>S.users.find(x=>x.username===(u||'').trim().toLowerCase());
+const userById=id=>S.users.find(x=>x.id===id);
+function roleLabel(r){return r==='admin'?'Administrator':(r==='manager'?'Manager':'Collector');}
+function isAdmin(){return!!AUTH.user&&AUTH.user.role==='admin';}
+function isManager(){return!!AUTH.user&&AUTH.user.role==='manager';}
+function canSeeAll(){return isAdmin()||isManager();}
+function canCollect(){return!!AUTH.user&&(AUTH.user.role==='manager'||AUTH.user.role==='collector');}
+function canManageUsers(){return isAdmin();}
+function canApproveFor(collectorId){return(isManager()||isAdmin())&&collectorId!==AUTH.user.id;}
+
+async function login(username,password){
+  const u=userByUsername(username);
+  if(!u)return{ok:false,msg:'Unknown username'};
+  if(u.status==='blocked')return{ok:false,msg:'This account is blocked. Contact the administrator.'};
+  if((await sha256(password||''))!==u.pass)return{ok:false,msg:'Incorrect password'};
+  AUTH.user=u;try{localStorage.setItem('afodan_session',u.id);}catch(e){}
+  return{ok:true};
+}
+function logout(){AUTH.user=null;try{localStorage.removeItem('afodan_session');}catch(e){}closeSheet();showLogin();}
+
+/* ---- visibility scope ---- */
+const ownsClient=c=>!!c&&c.ownerId===(AUTH.user&&AUTH.user.id);
+function scopedClients(){return canSeeAll()?S.clients.slice():S.clients.filter(ownsClient);}
+function scopeSet(){return new Set(scopedClients().map(c=>c.id));}
+
+/* ---- collection ownership & daily closures ---- */
+function collectionCollectorId(col){const c=clientById(col.clientId);return(c&&c.ownerId)||col.collectorId||null;}
+const closureKey=(collectorId,date)=>collectorId+'_'+date;
+function getClosure(collectorId,date){return S.closures.find(c=>c.collectorId===collectorId&&c.date===date)||null;}
+function closureStatus(collectorId,date){const c=getClosure(collectorId,date);return c?c.status:'open';}
+function dayCollections(collectorId,date){return S.collections.filter(c=>c.date===date&&collectionCollectorId(c)===collectorId);}
+function dayTotal(collectorId,date){return dayCollections(collectorId,date).reduce((s,c)=>s+c.amount,0);}
+function isCollectionLocked(col){return closureStatus(collectionCollectorId(col),col.date)==='approved';}
+function clientHasLocked(clientId){return S.collections.some(c=>c.clientId===clientId&&isCollectionLocked(c));}
+function planHasLocked(planId){return S.collections.some(c=>c.planId===planId&&isCollectionLocked(c));}
+async function saveClosure(c){await put('closures',c);const i=S.closures.findIndex(x=>x.id===c.id);if(i<0)S.closures.push(c);else S.closures[i]=c;return c;}
+async function submitDay(collectorId,date){
+  const now=new Date().toISOString();let c=getClosure(collectorId,date);
+  const total=dayTotal(collectorId,date),count=dayCollections(collectorId,date).length;
+  c=Object.assign(c||{id:closureKey(collectorId,date),collectorId,date,approvedBy:null,approvedAt:null},{status:'submitted',submittedAt:now,submittedBy:AUTH.user.id,total,count});
+  return saveClosure(c);
+}
+async function approveDay(collectorId,date){
+  const now=new Date().toISOString();let c=getClosure(collectorId,date);
+  const total=dayTotal(collectorId,date),count=dayCollections(collectorId,date).length;
+  c=Object.assign(c||{id:closureKey(collectorId,date),collectorId,date},{status:'approved',approvedBy:AUTH.user.id,approvedAt:now,total,count});
+  return saveClosure(c);
+}
+function pendingClosures(){return S.closures.filter(c=>c.status==='submitted');}
+
+/* ---- user management (admin) ---- */
+async function addUser(data){
+  const username=(data.username||'').trim().toLowerCase();
+  if(!data.name.trim()||!username)return{ok:false,msg:'Name and username are required'};
+  if(userByUsername(username))return{ok:false,msg:'That username already exists'};
+  const u={id:uid(),name:data.name.trim(),username,role:data.role||'collector',pass:await sha256(data.password||DEFAULT_PW),status:'active',createdAt:new Date().toISOString()};
+  await put('users',u);S.users.push(u);return{ok:true,user:u};
+}
+async function setUserStatus(id,status){const u=userById(id);if(u){u.status=status;await put('users',u);}}
+async function setUserRole(id,role){const u=userById(id);if(u){u.role=role;await put('users',u);}}
+async function resetUserPassword(id,pw){const u=userById(id);if(u){u.pass=await sha256(pw||DEFAULT_PW);await put('users',u);}}
+async function changeMyPassword(oldPw,newPw){
+  if((await sha256(oldPw||''))!==AUTH.user.pass)return{ok:false,msg:'Current password is wrong'};
+  if(!newPw||newPw.length<4)return{ok:false,msg:'New password must be at least 4 characters'};
+  AUTH.user.pass=await sha256(newPw);await put('users',AUTH.user);return{ok:true};
+}
+
+/* ==================================================================
    UI
    ================================================================== */
 const $=s=>document.querySelector(s);
@@ -506,15 +662,15 @@ function closeSheet(){if(typeof closeCamera==='function')closeCamera();$('#sheet
 $('#sheetBg').addEventListener('click',closeSheet);
 
 function render(){
-  ({home:renderHome,clients:renderClients,collect:renderCollect,money:renderMoney,reports:renderReports}[currentScreen]||(()=>{}))();
+  ({home:renderHome,clients:renderClients,collect:renderCollect,money:renderMoney,reports:renderReports,approvals:renderApprovals,users:renderUsers}[currentScreen]||(()=>{}))();
 }
 
 /* ---------- HOME ---------- */
 function greeting(){const h=new Date().getHours();return h<12?'Good morning':(h<17?'Good afternoon':'Good evening');}
 function renderHome(){
   const apc=allActivePlanCycles();
-  const nClients=S.clients.filter(c=>c.status==='active').length;
-  const who=S.settings.collector?(', '+S.settings.collector.split(/\s+/)[0]):'';
+  const nClients=scopedClients().filter(c=>c.status==='active').length;
+  const who=AUTH.user?(', '+AUTH.user.name.split(/\s+/)[0]):'';
   $('#greetHi').textContent=`${greeting()}${who} 👋`;
   $('#greetSub').textContent="Here's today's collection";
   $('#greetDate').textContent=niceDate(todayStr());
@@ -526,6 +682,7 @@ function renderHome(){
   $('#homePaidPill').textContent=`${paid}/${apc.length} today`;
   $('#homeProfitMonth').textContent=fmtMoney(profitInMonth(monthKey(todayStr())));
   $('#homeProfitTotal').textContent=fmtMoney(totalProfit());
+  buildHomeRole();
 
   const box=$('#homeAttention');box.innerHTML='';
   const ready=apc.filter(x=>daysCovered(x.cycle.id,x.plan)>=CYCLE_DAYS);
@@ -562,7 +719,7 @@ function renderHome(){
 let cliFilter='active',cliQuery='';
 function renderClients(){
   const list=$('#clientList');list.innerHTML='';
-  let items=S.clients.slice();
+  let items=scopedClients();
   if(cliFilter==='active')items=items.filter(c=>c.status==='active');
   if(cliFilter==='due')items=items.filter(c=>activePlans(c.id).some(p=>{const cy=activeCycle(p.id);return cy&&!collectedToday(cy.id)&&daysCovered(cy.id,p)<CYCLE_DAYS;}));
   if(cliQuery){const q=cliQuery.toLowerCase();items=items.filter(c=>(c.name+' '+c.phone+' '+c.business).toLowerCase().includes(q));}
@@ -766,7 +923,7 @@ function openCollectSheet(planId){
 async function submitCollection(planId){
   const p=planById(planId);const amt=+$('#colAmt').value;const date=$('#colDate').value||todayStr();
   if(!amt||amt<=0){toast('Enter a valid amount','bad');return;}
-  await recordCollection(p,amt,date);closeSheet();toast('Collection saved','good');render();
+  const r=await recordCollection(p,amt,date);if(!r)return;closeSheet();toast('Collection saved','good');render();
 }
 
 /* ---------- WITHDRAW sheet ---------- */
@@ -956,6 +1113,7 @@ async function submitEditClient(id){
 }
 function confirmDeleteClient(id){
   const c=clientById(id);if(!c)return;
+  if(clientHasLocked(id)){openSheet(`<h2>Can't delete</h2><p class="sub">${esc(c.name)} has approved (locked) collections. Approved daily records are permanent and cannot be deleted.</p><button class="btn sec" onclick="openClient('${c.id}')">Back</button>`);return;}
   openSheet(`<h2>Delete client?</h2><p class="sub">Permanently removes ${esc(c.name)}, all their plans and records. Cannot be undone.</p>
     <button class="btn red" onclick="doDeleteClient('${c.id}')">🗑 Yes, delete</button>
     <div style="height:8px"></div><button class="btn sec" onclick="openClient('${c.id}')">Cancel</button>`);
@@ -963,6 +1121,7 @@ function confirmDeleteClient(id){
 async function doDeleteClient(id){await deleteClient(clientById(id));closeSheet();toast('Client deleted');go('clients');}
 function confirmDeletePlan(id){
   const p=planById(id);if(!p)return;const c=clientById(p.clientId);
+  if(planHasLocked(id)){openSheet(`<h2>Can't delete</h2><p class="sub">This plan has approved (locked) collections and cannot be deleted.</p><button class="btn sec" onclick="openClient('${p.clientId}')">Back</button>`);return;}
   openSheet(`<h2>Delete plan?</h2><p class="sub">Removes the ${esc(p.label)} plan and its records for ${esc(c.name)}. Cannot be undone.</p>
     <button class="btn red" onclick="doDeletePlan('${p.id}')">🗑 Yes, delete plan</button>
     <div style="height:8px"></div><button class="btn sec" onclick="openClient('${p.clientId}')">Cancel</button>`);
@@ -995,7 +1154,7 @@ function renderCollect(){
   });
 }
 async function quickCollect(planId){
-  const p=planById(planId);await recordCollection(p,p.dailyAmount,todayStr());
+  const p=planById(planId);const r=await recordCollection(p,p.dailyAmount,todayStr());if(!r)return;
   toast(`${esc(clientById(p.clientId).name)}: +${fmtMoney(p.dailyAmount)}`,'good');render();
 }
 
@@ -1023,7 +1182,8 @@ function renderMoney(){
 
 /* ---------- REPORTS ---------- */
 function renderReports(){
-  const done=S.cycles.filter(c=>c.status==='completed');
+  const sc=scopeSet();
+  const done=S.cycles.filter(c=>c.status==='completed'&&sc.has(c.clientId));
   $('#repProfit').textContent=fmtMoney(totalProfit());
   $('#repProfitMeta').textContent=`from ${done.length} completed plan cycle${done.length===1?'':'s'}`;
   const months=[];const now=new Date();
@@ -1033,16 +1193,18 @@ function renderReports(){
   $('#repChart').innerHTML=months.map((mk,i)=>{
     const h=Math.round(vals[i]/max*100);const lbl=moNames[+mk.split('-')[1]-1];
     return `<div class="b"><div class="bv">${vals[i]?fmtMoney(vals[i]).replace(CUR,''):''}</div><i style="height:${vals[i]?Math.max(6,h):2}%"></i><div class="bl">${lbl}</div></div>`;}).join('');
-  const totalCollectedAll=S.collections.reduce((s,c)=>s+c.amount,0);
-  const totalPaidOut=S.withdrawals.reduce((s,w)=>s+w.amount,0);
+  const totalCollectedAll=S.collections.filter(c=>sc.has(c.clientId)).reduce((s,c)=>s+c.amount,0);
+  const totalPaidOut=S.withdrawals.filter(w=>sc.has(w.clientId)).reduce((s,w)=>s+w.amount,0);
+  const nCli=scopedClients().filter(c=>c.status==='active').length;
+  const nPlans=S.plans.filter(p=>p.status==='active'&&sc.has(p.clientId)).length;
   $('#repOverview').innerHTML=`
     <div class="kv"><span class="k">Total savings held now</span><span class="v">${fmtMoney(totalHolding())}</span></div>
-    <div class="kv"><span class="k">Active clients / plans</span><span class="v">${S.clients.filter(c=>c.status==='active').length} / ${S.plans.filter(p=>p.status==='active').length}</span></div>
+    <div class="kv"><span class="k">Active clients / plans</span><span class="v">${nCli} / ${nPlans}</span></div>
     <div class="kv"><span class="k">All-time collected</span><span class="v">${fmtMoney(totalCollectedAll)}</span></div>
     <div class="kv"><span class="k">All-time paid out</span><span class="v">${fmtMoney(totalPaidOut)}</span></div>
     <div class="kv"><span class="k">Completed cycles</span><span class="v">${done.length}</span></div>
     <div class="kv"><span class="k">Total profit</span><span class="v pos">${fmtMoney(totalProfit())}</span></div>`;
-  const payouts=S.withdrawals.filter(w=>w.type==='payout').sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  const payouts=S.withdrawals.filter(w=>w.type==='payout'&&sc.has(w.clientId)).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
   const box=$('#repPayouts');
   if(payouts.length===0)box.innerHTML=`<div style="text-align:center;color:var(--muted);padding:14px;font-size:13.5px">No payouts yet.</div>`;
   else box.innerHTML=payouts.slice(0,15).map(w=>{const c=clientById(w.clientId);const p=planById(w.planId);
@@ -1066,15 +1228,23 @@ function openSettings(){
       • All data stays privately on this device and works offline.</div>
     <div class="divider"></div>
     <button class="btn sec" onclick="exportData()">⬇ Backup data to file</button>
+    <div class="divider"></div>
+    <div style="font-weight:800;font-size:14px;margin-bottom:10px">Account</div>
+    <div class="kv"><span class="k">Signed in as</span><span class="v">${AUTH.user?esc(AUTH.user.name):''} <span class="rolechip ${AUTH.user?AUTH.user.role:''}">${AUTH.user?roleLabel(AUTH.user.role):''}</span></span></div>
+    <div style="height:12px"></div>
+    <button class="btn sec" onclick="openChangePw()">🔑 Change my password</button>
+    ${canManageUsers()?'<div style="height:8px"></div><button class="btn sec" onclick="closeSheet();go(\'users\')">👤 Manage users</button>':''}
     <div style="height:8px"></div>
-    <div style="font-size:11.5px;color:var(--muted);text-align:center">AFODAN · v1.0 · offline PWA</div>`);
+    <button class="btn red" onclick="logout()">Log out</button>
+    <div style="height:12px"></div>
+    <div style="font-size:11.5px;color:var(--muted);text-align:center">AFODAN · v1.0 · works offline</div>`);
 }
 async function submitSettings(){
   await setSetting('bizName',$('#setBiz').value.trim()||'AFODAN');
   await setSetting('collector',$('#setCollector').value.trim());
   await setSetting('bizPhone',$('#setPhone').value.trim());
   await setSetting('bizLoc',$('#setLoc').value.trim());
-  applyBranding();closeSheet();toast('Settings saved','good');
+  applyBranding();applySession();closeSheet();toast('Settings saved','good');
 }
 function applyBranding(){
   $('#bizName').textContent=S.settings.bizName||'AFODAN';
@@ -1101,7 +1271,164 @@ async function importData(file){
   }catch(e){toast('Could not read file','bad');}
 }
 
+/* ==================================================================
+   ROLE UI — home cards · approvals · users · session
+   ================================================================== */
+function buildHomeRole(){
+  const box=$('#homeRole');if(!box)return;box.innerHTML='';
+  const u=AUTH.user;if(!u)return;const today=todayStr();
+  if(canCollect()){
+    const st=closureStatus(u.id,today),tot=dayTotal(u.id,today),cnt=dayCollections(u.id,today).length;
+    let action;
+    if(st==='approved')action='<span class="status-badge approved">✓ Approved &amp; closed</span>';
+    else if(st==='submitted')action='<span class="status-badge submitted">⏳ Awaiting approval</span>';
+    else action=`<button class="btn sm ${cnt?'':'sec'}" ${cnt?'':'disabled'} onclick="doSubmitDay()">Submit for approval</button>`;
+    box.innerHTML+=`<div class="role-card"><div class="rc-top"><h4>Your collection today</h4>${action}</div>
+      <div style="display:flex;gap:28px;margin-top:12px">
+        <div><div class="bc-k" style="color:var(--muted)">Total</div><div style="font-size:20px;font-weight:800">${fmtMoney(tot)}</div></div>
+        <div><div class="bc-k" style="color:var(--muted)">Entries</div><div style="font-size:20px;font-weight:800">${cnt}</div></div>
+      </div>
+      ${st==='submitted'?'<div style="font-size:12px;color:var(--muted);margin-top:10px">A manager will verify the cash and approve it.</div>':''}
+      ${st==='approved'?'<div style="font-size:12px;color:var(--muted);margin-top:10px">🔒 Locked — this day can no longer be edited or deleted.</div>':''}</div>`;
+  }
+  if(canSeeAll()){
+    const pend=pendingClosures().filter(c=>canApproveFor(c.collectorId));
+    box.innerHTML+=`<button class="role-card" style="width:100%;text-align:left;display:block" onclick="go('approvals')">
+      <div class="rc-top"><h4>💰 Approvals</h4>${pend.length?`<span class="status-badge submitted">${pend.length} pending</span>`:'<span class="status-badge open">None pending</span>'}</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Review &amp; close other collectors' daily collections.</div></button>`;
+  }
+  if(canManageUsers()){
+    box.innerHTML+=`<button class="role-card" style="width:100%;text-align:left;display:block" onclick="go('users')">
+      <div class="rc-top"><h4>👤 User management</h4><span class="status-badge open">${S.users.length} users</span></div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Add collectors, block accounts, reset passwords.</div></button>`;
+  }
+}
+async function doSubmitDay(){await submitDay(AUTH.user.id,todayStr());toast('Day submitted for approval ✓','good');render();}
+
+/* ---- Approvals ---- */
+function renderApprovals(){
+  if(!canSeeAll()){go('home');return;}
+  const pbox=$('#apprPending');pbox.innerHTML='';
+  const pend=pendingClosures().sort((a,b)=>(b.submittedAt||'').localeCompare(a.submittedAt||''));
+  if(pend.length===0)pbox.innerHTML=`<div class="empty" style="padding:26px"><div class="em">✅</div><h3>Nothing pending</h3><p>Submitted collections appear here for approval.</p></div>`;
+  else pend.forEach(c=>{
+    const u=userById(c.collectorId);const mine=!canApproveFor(c.collectorId);
+    const b=el('div','cli');
+    b.innerHTML=`<div class="avatar" style="background:${avatarColor(c.collectorId)}">${initials(u?u.name:'?')}</div>
+      <div style="min-width:0"><div class="nm">${esc(u?u.name:'Unknown')}${mine?' <span class="chip gray">you</span>':''}</div>
+      <div class="sub">${niceDate(c.date)} · ${c.count} entries · <b>${fmtMoney(c.total)}</b></div></div>
+      <div class="rt"><span class="status-badge submitted">Review ▸</span></div>`;
+    b.onclick=()=>openDayReview(c.collectorId,c.date);pbox.appendChild(b);
+  });
+  const dbox=$('#apprDone');dbox.innerHTML='';
+  const done=S.closures.filter(c=>c.status==='approved').sort((a,b)=>(b.approvedAt||'').localeCompare(a.approvedAt||'')).slice(0,20);
+  if(done.length===0)dbox.innerHTML=`<div style="text-align:center;color:var(--muted);padding:14px;font-size:13.5px">No approvals yet.</div>`;
+  else done.forEach(c=>{const u=userById(c.collectorId),ap=userById(c.approvedBy);const b=el('div','cli');
+    b.innerHTML=`<div class="avatar" style="background:${avatarColor(c.collectorId)}">${initials(u?u.name:'?')}</div>
+      <div style="min-width:0"><div class="nm">${esc(u?u.name:'—')}</div><div class="sub">${niceDate(c.date)} · ${fmtMoney(c.total)} · by ${esc(ap?ap.name:'—')}</div></div>
+      <div class="rt"><span class="status-badge approved">Closed</span></div>`;
+    b.onclick=()=>openDayReview(c.collectorId,c.date);dbox.appendChild(b);
+  });
+}
+function openDayReview(collectorId,date){
+  const u=userById(collectorId);
+  const cols=dayCollections(collectorId,date).slice().sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+  const total=cols.reduce((s,c)=>s+c.amount,0);const st=closureStatus(collectorId,date);
+  const rows=cols.map(c=>{const cl=clientById(c.clientId),p=planById(c.planId);
+    return `<div class="txn"><div class="ti">📥</div><div style="min-width:0"><div class="tt">${cl?esc(cl.name):'—'}</div><div class="ts">${p?esc(p.label):''}</div></div><div class="ta">${fmtMoney(c.amount)}</div></div>`;}).join('')||'<div style="text-align:center;color:var(--muted);padding:12px">No entries.</div>';
+  const canApp=canApproveFor(collectorId)&&st!=='approved';
+  const cl2=getClosure(collectorId,date);const appName=cl2&&cl2.approvedBy?(userById(cl2.approvedBy)||{}).name:'';
+  const html=`
+    <h2>${esc(u?u.name:'Collector')}'s day</h2>
+    <p class="sub">${niceDate(date)} &nbsp;<span class="status-badge ${st}">${st==='approved'?'Approved & closed':(st==='submitted'?'Submitted':'Open')}</span></p>
+    <div class="card" style="margin-bottom:14px"><div class="kv"><span class="k">Entries</span><span class="v">${cols.length}</span></div>
+      <div class="kv"><span class="k">Total collected</span><span class="v big">${fmtMoney(total)}</span></div></div>
+    <div class="card" style="margin-bottom:14px">${rows}</div>
+    ${st==='approved'?`<div class="note-box" style="margin-bottom:14px">🔒 Approved by ${esc(appName||'—')}. Records are locked.</div>`:''}
+    ${canApp?`<div class="note-box" style="margin-bottom:14px">Confirm you have physically received <b>${fmtMoney(total)}</b> in cash before approving.</div>
+      <button class="btn green" onclick="doApproveDay('${collectorId}','${date}')">✓ Approve &amp; close day</button><div style="height:8px"></div>`:''}
+    ${(!canApp&&st!=='approved'&&collectorId===AUTH.user.id)?'<div class="note-box" style="margin-bottom:14px">You can\'t approve your own day — another manager or the admin must approve it.</div>':''}
+    <button class="btn sec" onclick="closeSheet()">Close</button>`;
+  openSheet(html);
+}
+async function doApproveDay(collectorId,date){await approveDay(collectorId,date);closeSheet();toast('Day approved & closed ✓','good');go('approvals');}
+
+/* ---- Users (admin) ---- */
+function renderUsers(){
+  if(!canManageUsers()){go('home');return;}
+  const list=$('#usersList');list.innerHTML='';
+  S.users.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(u=>{
+    const b=el('div','cli');const stat=u.status==='blocked'?'<span class="status-badge blocked">Blocked</span>':'';
+    b.innerHTML=`<div class="avatar" style="background:${avatarColor(u.id)}">${initials(u.name)}</div>
+      <div style="min-width:0"><div class="nm">${esc(u.name)} ${u.id===AUTH.user.id?'<span class="chip gray">you</span>':''}</div>
+      <div class="sub">@${esc(u.username)} · <span class="rolechip ${u.role}">${roleLabel(u.role)}</span> ${stat}</div></div>
+      <div class="rt"><span class="chip gray">Manage ▸</span></div>`;
+    b.onclick=()=>openManageUser(u.id);list.appendChild(b);
+  });
+}
+function openManageUser(id){
+  const u=userById(id);if(!u)return;const self=u.id===AUTH.user.id;
+  openSheet(`<h2>${esc(u.name)}</h2><p class="sub">@${esc(u.username)} · ${roleLabel(u.role)}</p>
+    <div class="field"><label>Role</label>
+      <select id="muRole" ${self?'disabled':''}>
+        <option value="collector"${u.role==='collector'?' selected':''}>Collector</option>
+        <option value="manager"${u.role==='manager'?' selected':''}>Manager (collect + approve)</option>
+        <option value="admin"${u.role==='admin'?' selected':''}>Administrator</option>
+      </select>${self?'<div class="hint">You cannot change your own role.</div>':''}</div>
+    <button class="btn" onclick="saveUserRole('${u.id}')" ${self?'disabled':''}>Save role</button>
+    <div class="divider"></div>
+    <div class="field"><label>Reset password</label><input id="muPw" placeholder="New password (min 4 chars)"></div>
+    <button class="btn sec" onclick="doResetPw('${u.id}')">Reset password</button>
+    <div class="divider"></div>
+    ${self?'<div class="note-box">You cannot block your own account.</div>':(u.status==='blocked'
+      ?`<button class="btn green" onclick="doBlock('${u.id}','active')">✓ Unblock account</button>`
+      :`<button class="btn red" onclick="doBlock('${u.id}','blocked')">🚫 Block account</button>`)}
+    <div style="height:8px"></div><button class="btn sec" onclick="go('users')">Back</button>`);
+}
+async function saveUserRole(id){await setUserRole(id,$('#muRole').value);closeSheet();toast('Role updated','good');renderUsers();}
+async function doResetPw(id){const pw=$('#muPw').value.trim();if(pw.length<4){toast('Min 4 characters','bad');return;}await resetUserPassword(id,pw);closeSheet();toast('Password reset','good');}
+async function doBlock(id,status){await setUserStatus(id,status);closeSheet();toast(status==='blocked'?'Account blocked':'Account unblocked','good');renderUsers();}
+function openAddUser(){
+  openSheet(`<h2>Add user</h2><p class="sub">Create a collector, manager or admin account.</p>
+    <div class="field"><label>Full name *</label><input id="auName" placeholder="e.g. Kwame Boateng"></div>
+    <div class="field"><label>Username *</label><input id="auUser" autocapitalize="none" placeholder="e.g. kwame"></div>
+    <div class="field"><label>Role</label><select id="auRole">
+      <option value="collector">Collector — records own daily collection</option>
+      <option value="manager">Manager — collect + approve others</option>
+      <option value="admin">Administrator — manage users</option></select></div>
+    <div class="field"><label>Password</label><input id="auPw" placeholder="Leave blank for default: afodan123"></div>
+    <button class="btn" onclick="doAddUser()">✓ Create user</button>
+    <div style="height:8px"></div><button class="btn sec" onclick="go('users')">Cancel</button>`);
+}
+async function doAddUser(){
+  const r=await addUser({name:$('#auName').value,username:$('#auUser').value,role:$('#auRole').value,password:$('#auPw').value.trim()});
+  if(!r.ok){toast(r.msg,'bad');return;}
+  closeSheet();toast('User created ✓','good');renderUsers();
+}
+
+/* ---- account / password ---- */
+function openChangePw(){
+  openSheet(`<h2>Change password</h2>
+    <div class="field"><label>Current password</label><input id="cpOld" type="password"></div>
+    <div class="field"><label>New password</label><input id="cpNew" type="password" placeholder="min 4 characters"></div>
+    <button class="btn" onclick="doChangePw()">✓ Update password</button>
+    <div style="height:8px"></div><button class="btn sec" onclick="openSettings()">Back</button>`);
+}
+async function doChangePw(){const r=await changeMyPassword($('#cpOld').value,$('#cpNew').value);if(!r.ok){toast(r.msg,'bad');return;}closeSheet();toast('Password updated','good');}
+
+/* ---- session UI ---- */
+function applySession(){const u=AUTH.user;$('#headSub').textContent=u?`${u.name} · ${roleLabel(u.role)}`:'';}
+function showLogin(){document.body.classList.remove('authed');$('#login').classList.add('show');const p=$('#loginPass');if(p)p.value='';const e=$('#loginErr');if(e)e.textContent='';}
+function enterApp(){document.body.classList.add('authed');$('#login').classList.remove('show');applySession();go('home');}
+
 /* ---------- events ---------- */
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();const err=$('#loginErr');err.textContent='Signing in…';
+  const r=await login($('#loginUser').value,$('#loginPass').value);
+  if(!r.ok){err.textContent=r.msg;return;}
+  err.textContent='';enterApp();
+});
+$('#loginToggle').addEventListener('click',()=>{const p=$('#loginPass');p.type=p.type==='password'?'text':'password';});
 $('#nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.s);});
 $('#fab').addEventListener('click',openAddClient);
 $('#btnAddClient2').addEventListener('click',openAddClient);
@@ -1120,8 +1447,12 @@ window.addEventListener('online',updateOnline);window.addEventListener('offline'
 
 /* ---------- boot ---------- */
 (async function(){
-  try{await openDB();await loadAll();applyBranding();updateOnline();go('home');}
-  catch(e){document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:sans-serif"><h2>Storage unavailable</h2><p>This app needs on-device storage (IndexedDB). Please open it in a normal browser tab, not private mode.</p><p style="color:#888;font-size:13px">'+esc(e.message||e)+'</p></div>';}
+  try{
+    await openDB();await loadAll();await seedUsers();await migrateOwnership();applyBranding();updateOnline();
+    let sid=null;try{sid=localStorage.getItem('afodan_session');}catch(e){}
+    const u=sid&&userById(sid);
+    if(u&&u.status==='active'){AUTH.user=u;enterApp();}else{showLogin();}
+  }catch(e){document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:sans-serif"><h2>Storage unavailable</h2><p>This app needs on-device storage (IndexedDB). Please open it in a normal browser tab, not private mode.</p><p style="color:#888;font-size:13px">'+esc(e.message||e)+'</p></div>';}
 })();
 
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));}
