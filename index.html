@@ -22,7 +22,7 @@
     --line:#ecedf4; --soft:#f6f7fb;
     --shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.06);
     --shadow-lg:0 22px 48px rgba(16,24,40,.20);
-    --r:20px;
+    --r:15px;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0}
@@ -43,7 +43,7 @@
     border-bottom:1px solid var(--line);
   }
   .app-header .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .app-header h1{margin:0;font-size:16.5px;font-weight:800;letter-spacing:.4px;display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .app-header h1{margin:0;font-size:15px;font-weight:800;letter-spacing:.4px;display:flex;align-items:center;gap:8px;color:var(--ink)}
   .logo-dot{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-l));display:grid;place-items:center;font-size:15px;color:#fff;box-shadow:0 4px 12px rgba(79,70,229,.35)}
   .head-sub{font-size:11.5px;color:var(--muted);margin-top:1px;font-weight:500}
   .head-btn{color:var(--ink);background:var(--soft);border:1px solid var(--line);width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:17px}
@@ -51,44 +51,44 @@
   .offline-pill.show{display:inline-flex}
 
   /* fintech home components */
-  .greet{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 2px 16px}
-  .greet .hi{font-size:22px;font-weight:800;letter-spacing:-.2px}
-  .greet .hisub{font-size:13px;color:var(--muted);margin-top:2px;font-weight:500}
-  .pill-ghost{background:var(--soft);border:1px solid var(--line);color:var(--muted);font-weight:700;font-size:12px;padding:8px 13px;border-radius:999px}
-  .balance-card{position:relative;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-l) 62%,var(--violet) 100%);color:#fff;border-radius:26px;padding:20px 20px 22px;box-shadow:0 18px 40px rgba(79,70,229,.34);overflow:hidden}
-  .balance-card::after{content:"";position:absolute;right:-40px;top:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.10)}
-  .balance-card::before{content:"";position:absolute;right:20px;top:60px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.06)}
+  .greet{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:3px 2px 13px}
+  .greet .hi{font-size:19px;font-weight:800;letter-spacing:-.2px}
+  .greet .hisub{font-size:12px;color:var(--muted);margin-top:2px;font-weight:500}
+  .pill-ghost{background:var(--soft);border:1px solid var(--line);color:var(--muted);font-weight:700;font-size:11.5px;padding:6px 11px;border-radius:999px}
+  .balance-card{position:relative;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-l) 62%,var(--violet) 100%);color:#fff;border-radius:20px;padding:16px 16px 18px;box-shadow:0 16px 34px rgba(79,70,229,.32);overflow:hidden}
+  .balance-card::after{content:"";position:absolute;right:-40px;top:-50px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.10)}
+  .balance-card::before{content:"";position:absolute;right:20px;top:56px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.06)}
   .bc-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
-  .bc-lbl{font-size:12.5px;opacity:.92;font-weight:600;letter-spacing:.2px}
-  .bc-amt{font-size:34px;font-weight:800;letter-spacing:-.6px;margin:8px 0 3px;position:relative;z-index:1}
-  .bc-delta{font-size:12.5px;opacity:.9;font-weight:500;position:relative;z-index:1}
-  .bc-foot{display:flex;gap:26px;margin-top:20px;position:relative;z-index:1}
-  .bc-k{font-size:11px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-  .bc-v{font-size:15px;font-weight:700;margin-top:3px}
-  .bc-cta{position:absolute;right:16px;bottom:18px;z-index:2;background:var(--ink-btn);color:#fff;font-weight:700;font-size:13.5px;padding:11px 18px;border-radius:14px;box-shadow:0 8px 18px rgba(11,16,32,.4);display:inline-flex;align-items:center;gap:7px}
+  .bc-lbl{font-size:11.5px;opacity:.92;font-weight:600;letter-spacing:.2px}
+  .bc-amt{font-size:27px;font-weight:800;letter-spacing:-.5px;margin:6px 0 2px;position:relative;z-index:1}
+  .bc-delta{font-size:11.5px;opacity:.9;font-weight:500;position:relative;z-index:1}
+  .bc-foot{display:flex;gap:24px;margin-top:15px;position:relative;z-index:1}
+  .bc-k{font-size:10px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .bc-v{font-size:14px;font-weight:700;margin-top:2px}
+  .bc-cta{position:absolute;right:14px;bottom:15px;z-index:2;background:var(--ink-btn);color:#fff;font-weight:700;font-size:12.5px;padding:9px 15px;border-radius:12px;box-shadow:0 8px 18px rgba(11,16,32,.4);display:inline-flex;align-items:center;gap:6px}
   .bc-cta:active{transform:scale(.96)}
-  .qacts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 6px}
-  .qact{display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 4px 11px;font-size:11.5px;font-weight:700;color:var(--ink);box-shadow:var(--shadow)}
+  .qacts{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 4px}
+  .qact{display:flex;flex-direction:column;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 4px 9px;font-size:11px;font-weight:700;color:var(--ink);box-shadow:var(--shadow)}
   .qact:active{transform:scale(.96)}
-  .qact .qi{width:40px;height:40px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:18px;color:var(--brand)}
-  .row-between{display:flex;align-items:center;justify-content:space-between;margin:24px 4px 12px}
+  .qact .qi{width:36px;height:36px;border-radius:11px;background:var(--soft);display:grid;place-items:center;font-size:16px;color:var(--brand)}
+  .row-between{display:flex;align-items:center;justify-content:space-between;margin:19px 3px 10px}
   .row-between h3.blk{margin:0;font-size:16px;font-weight:800}
   .row-between .link{font-size:13px}
 
-  .screen{display:none;padding:16px 16px 24px;animation:fade .18s ease}
+  .screen{display:none;padding:13px 13px 22px;animation:fade .18s ease}
   .screen.active{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-  .section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:22px 4px 10px}
-  .section-title:first-child{margin-top:6px}
+  .section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:17px 3px 8px}
+  .section-title:first-child{margin-top:4px}
 
-  .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
-  .card + .card{margin-top:12px}
+  .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:13px}
+  .card + .card{margin-top:10px}
 
-  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .stat{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:15px 15px 14px;position:relative;overflow:hidden}
-  .stat .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;margin-bottom:10px}
-  .stat .lbl{font-size:12.5px;color:var(--muted);font-weight:600}
-  .stat .val{font-size:21px;font-weight:800;margin-top:2px;letter-spacing:-.3px}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:12px 12px 11px;position:relative;overflow:hidden}
+  .stat .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;margin-bottom:8px}
+  .stat .lbl{font-size:11.5px;color:var(--muted);font-weight:600}
+  .stat .val{font-size:18px;font-weight:800;margin-top:2px;letter-spacing:-.3px}
   .stat.wide{grid-column:1 / -1}
   .ic.t{background:#ccfbf1;color:var(--teal)} .ic.g{background:#dcfce7;color:var(--green)}
   .ic.a{background:#fef3c7;color:var(--amber)} .ic.b{background:#dbeafe;color:var(--blue)}
@@ -96,27 +96,27 @@
 
   .hero{background:linear-gradient(135deg,var(--teal),var(--teal-l));color:#fff;border-radius:var(--r);padding:18px;box-shadow:0 8px 24px rgba(15,118,110,.28)}
   .hero .lbl{font-size:13px;opacity:.9;font-weight:600}
-  .hero .amt{font-size:32px;font-weight:800;margin:4px 0 2px;letter-spacing:-.5px}
+  .hero .amt{font-size:26px;font-weight:800;margin:3px 0 2px;letter-spacing:-.5px}
   .hero .meta{font-size:12.5px;opacity:.85}
 
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--teal);color:#fff;font-weight:700;font-size:15px;padding:13px 18px;border-radius:13px;width:100%;transition:transform .06s,filter .15s}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--teal);color:#fff;font-weight:700;font-size:14px;padding:11px 16px;border-radius:12px;width:100%;transition:transform .06s,filter .15s}
   .btn:active{transform:scale(.98)}
   .btn.sec{background:var(--soft);color:var(--ink);border:1.5px solid var(--line)}
   .btn.green{background:var(--green)} .btn.amber{background:var(--amber)} .btn.red{background:var(--red)} .btn.blue{background:var(--blue)}
-  .btn.sm{width:auto;padding:9px 14px;font-size:13.5px;border-radius:10px}
+  .btn.sm{width:auto;padding:8px 12px;font-size:12.5px;border-radius:10px}
   .btn.ghost{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
   .btn:disabled{opacity:.5;pointer-events:none}
-  .btn-row{display:flex;gap:10px;margin-top:14px}
+  .btn-row{display:flex;gap:9px;margin-top:12px}
 
-  .cli{display:flex;align-items:center;gap:13px;padding:13px 14px;background:var(--card);border-radius:14px;box-shadow:var(--shadow);margin-bottom:10px;width:100%;text-align:left}
+  .cli{display:flex;align-items:center;gap:11px;padding:10px 12px;background:var(--card);border-radius:13px;box-shadow:var(--shadow);margin-bottom:8px;width:100%;text-align:left}
   .cli:active{transform:scale(.995)}
-  .avatar{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:#fff;font-size:16px;flex-shrink:0}
-  .cli .nm{font-weight:700;font-size:15px}
-  .cli .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .avatar{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px;flex-shrink:0}
+  .cli .nm{font-weight:700;font-size:14px}
+  .cli .sub{font-size:11.5px;color:var(--muted);margin-top:1px}
   .cli .rt{margin-left:auto;text-align:right;flex-shrink:0}
-  .cli .rt .bal{font-weight:800;font-size:15px}
-  .cli .rt .dcount{font-size:11.5px;color:var(--muted);margin-top:2px}
-  .chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .cli .rt .bal{font-weight:800;font-size:14px}
+  .cli .rt .dcount{font-size:11px;color:var(--muted);margin-top:1px}
+  .chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px}
   .chip.paid{background:#dcfce7;color:#15803d} .chip.due{background:#fef3c7;color:#b45309}
   .chip.done{background:#e0e7ff;color:#4338ca} .chip.new{background:#ccfbf1;color:#0f766e}
   .chip.gray{background:#eef2f6;color:#64748b}
@@ -130,9 +130,9 @@
   .day.charge{background:#fef3c7;border-color:#fcd34d;color:#b45309}
 
   .field{margin-bottom:14px}
-  .field label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px}
+  .field label{display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px}
   .field input,.field select,.field textarea{
-    width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);transition:border .15s,background .15s}
+    width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:11px;background:var(--soft);color:var(--ink);transition:border .15s,background .15s}
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal);background:#fff}
   .field .hint{font-size:12px;color:var(--muted);margin-top:5px}
   .amt-input{position:relative}
@@ -150,11 +150,11 @@
 
   .nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:9px 6px calc(9px + env(safe-area-inset-bottom));justify-content:space-around;align-items:flex-end}
   .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:10.5px;font-weight:600;padding:4px 2px;border-radius:12px}
-  .nav button .ni{font-size:20px;line-height:1;filter:grayscale(.2)}
+  .nav button .ni{font-size:19px;line-height:1;filter:grayscale(.2)}
   .nav button.on{color:var(--brand)}
   .nav button.on .ni{filter:none}
   .nav button.navc{flex:0 0 auto;margin-top:-26px}
-  .nav .navc-in{width:56px;height:56px;border-radius:20px;background:linear-gradient(135deg,var(--brand),var(--brand-l));display:grid;place-items:center;font-size:24px;color:#fff;box-shadow:0 10px 22px rgba(79,70,229,.45);border:4px solid var(--bg)}
+  .nav .navc-in{width:52px;height:52px;border-radius:17px;background:linear-gradient(135deg,var(--brand),var(--brand-l));display:grid;place-items:center;font-size:22px;color:#fff;box-shadow:0 10px 22px rgba(79,70,229,.45);border:4px solid var(--bg)}
   .nav button.navc:active .navc-in{transform:scale(.94)}
 
   .sheet-bg{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -162,10 +162,10 @@
   .sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--card);border-radius:22px 22px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
   .sheet.show{transform:translateY(0)}
   .sheet .grip{width:40px;height:4px;border-radius:999px;background:var(--line);margin:0 auto 16px}
-  .sheet h2{margin:0 0 4px;font-size:20px}
-  .sheet .sub{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+  .sheet h2{margin:0 0 4px;font-size:18px}
+  .sheet .sub{color:var(--muted);font-size:12.5px;margin:0 0 15px}
 
-  .kv{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .kv{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
   .kv:last-child{border-bottom:none}
   .kv .k{color:var(--muted);font-size:14px}
   .kv .v{font-weight:700;font-size:15px}
@@ -177,7 +177,7 @@
   .toast.good{background:var(--green)} .toast.bad{background:var(--red)}
 
   .list-hdr{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 12px}
-  .list-hdr h2{margin:0;font-size:22px;font-weight:800}
+  .list-hdr h2{margin:0;font-size:19px;font-weight:800}
   .search{position:relative;margin-bottom:14px}
   .search input{width:100%;padding:12px 14px 12px 40px;border:1.5px solid var(--line);border-radius:13px;background:#fff}
   .search .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted)}
@@ -185,11 +185,11 @@
   .seg button{flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:700;color:var(--muted)}
   .seg button.on{background:#fff;color:var(--teal);box-shadow:var(--shadow)}
 
-  .plan-card{border:1.5px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:#fff}
+  .plan-card{border:1.5px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px;background:#fff}
   .plan-card .ph{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-  .plan-card .plabel{font-weight:800;font-size:15px}
+  .plan-card .plabel{font-weight:800;font-size:14px}
   .plan-card .pmeta{font-size:12px;color:var(--muted);margin-top:1px}
-  .plan-card .pbal{font-weight:800;font-size:17px;text-align:right}
+  .plan-card .pbal{font-weight:800;font-size:15px;text-align:right}
 
   .mini-bar{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:8px;padding:0 2px}
   .mini-bar .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
@@ -251,9 +251,9 @@
   .status-badge.submitted{background:#fef3c7;color:#b45309}
   .status-badge.approved{background:#dcfce7;color:#15803d}
   .status-badge.blocked{background:#fee2e2;color:#b91c1c}
-  .role-card{background:linear-gradient(135deg,#eef2ff,#faf5ff);border:1px solid #e5e7ff;border-radius:18px;padding:16px;margin-bottom:12px}
+  .role-card{background:linear-gradient(135deg,#eef2ff,#faf5ff);border:1px solid #e5e7ff;border-radius:14px;padding:13px;margin-bottom:10px}
   .role-card .rc-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .role-card h4{margin:0;font-size:15px;font-weight:800}
+  .role-card h4{margin:0;font-size:14px;font-weight:800}
 </style>
 </head>
 <body>
@@ -321,6 +321,7 @@
     <div><div style="font-size:12.5px;color:var(--muted);font-weight:600">Collected today</div><div style="font-size:22px;font-weight:800" id="collectTotal">GH₵0</div></div>
     <div style="text-align:right"><div style="font-size:12.5px;color:var(--muted);font-weight:600">Remaining</div><div style="font-size:16px;font-weight:700" id="collectRemain">0 plans</div></div>
   </div>
+  <div id="collectNote"></div>
   <div class="seg" id="collectSeg">
     <button class="on" data-f="due">Not collected</button>
     <button data-f="done">Collected</button>
@@ -504,6 +505,7 @@ function profitInMonth(mk){const sc=scopeSet();return S.cycles.filter(c=>c.statu
 
 /* ---------- mutations ---------- */
 async function addClient(data){
+  if(!canEditData()){toast('Read-only account','bad');return null;}
   const now=new Date().toISOString();
   const client={id:uid(),ownerId:(AUTH.user&&AUTH.user.id)||null,name:data.name.trim(),phone:(data.phone||'').trim(),altPhone:(data.altPhone||'').trim(),business:(data.business||'').trim(),note:(data.note||'').trim(),photo:data.photo||'',status:'active',createdAt:now};
   await put('clients',client);
@@ -511,6 +513,7 @@ async function addClient(data){
   return client;
 }
 async function addPlan(clientId,{label,dailyAmount,cardNo}){
+  if(!canEditData())return null;
   const amt=Math.max(1,Math.round(+dailyAmount||0));
   const plan={id:uid(),clientId,label:(label||'').trim()||(fmtMoney(amt)+'/day'),cardNo:(cardNo||'').trim()||nextCardNo(),dailyAmount:amt,status:'active',createdAt:new Date().toISOString()};
   await put('plans',plan);
@@ -525,19 +528,24 @@ async function startCycle(plan){
 }
 async function recordCollection(plan,amount,dateStr){
   const date=dateStr||todayStr();
+  if(!canEditData()){toast('Read-only account — cannot record collections','bad');return null;}
   const client=clientById(plan.clientId);
   const collectorId=(client&&client.ownerId)||(AUTH.user&&AUTH.user.id)||null;
   if(closureStatus(collectorId,date)==='approved'){toast('That day is approved & closed — records are locked','bad');return null;}
+  const prior=firstUnapprovedPriorDay(collectorId,date);
+  if(prior){toast(`Your ${niceDate(prior)} collection must be approved before you can collect for a new day`,'bad');return null;}
   let cycle=activeCycle(plan.id);if(!cycle)cycle=await startCycle(plan);
   const c={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,collectorId,recordedBy:(AUTH.user&&AUTH.user.id)||null,date,amount:Math.round(+amount),createdAt:new Date().toISOString()};
   await put('collections',c);
   return c;
 }
 async function recordPartial(plan,cycle,amount){
+  if(!canEditData()){toast('Read-only account','bad');return null;}
   const w={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,date:todayStr(),type:'partial',amount:Math.round(+amount),serviceCharge:0,createdAt:new Date().toISOString()};
   await put('withdrawals',w);return w;
 }
 async function payout(plan,cycle,{startNew}){
+  if(!canEditData()){toast('Read-only account','bad');return null;}
   const collected=collectedTotal(cycle.id);const partials=partialsTotal(cycle.id);
   const charge=Math.min(collected,plan.dailyAmount);
   const pay=Math.max(0,collected-partials-charge);
@@ -549,6 +557,7 @@ async function payout(plan,cycle,{startNew}){
   return{charge,pay,collected};
 }
 async function deletePlan(plan){
+  if(!canEditData())return;
   for(const c of S.collections.filter(x=>x.planId===plan.id))await del('collections',c.id);
   for(const w of S.withdrawals.filter(x=>x.planId===plan.id))await del('withdrawals',w.id);
   for(const cy of S.cycles.filter(x=>x.planId===plan.id))await del('cycles',cy.id);
@@ -559,6 +568,7 @@ async function deletePlan(plan){
   S.plans=S.plans.filter(x=>x.id!==plan.id);
 }
 async function deleteClient(client){
+  if(!canEditData())return;
   for(const p of clientPlans(client.id))await deletePlan(p);
   await del('clients',client.id);S.clients=S.clients.filter(x=>x.id!==client.id);
 }
@@ -593,7 +603,9 @@ function isManager(){return!!AUTH.user&&AUTH.user.role==='manager';}
 function canSeeAll(){return isAdmin()||isManager();}
 function canCollect(){return!!AUTH.user&&(AUTH.user.role==='manager'||AUTH.user.role==='collector');}
 function canManageUsers(){return isAdmin();}
-function canApproveFor(collectorId){return(isManager()||isAdmin())&&collectorId!==AUTH.user.id;}
+// admin is READ-ONLY on client/collection data (user management only); managers & collectors write
+function canEditData(){return!!AUTH.user&&(AUTH.user.role==='manager'||AUTH.user.role==='collector');}
+function canApproveFor(collectorId){return isManager()&&collectorId!==AUTH.user.id;}
 
 async function login(username,password){
   try{await fbauth.signInWithEmailAndPassword(emailFor(username),password);return{ok:true};}
@@ -616,17 +628,25 @@ function getClosure(collectorId,date){return S.closures.find(c=>c.collectorId===
 function closureStatus(collectorId,date){const c=getClosure(collectorId,date);return c?c.status:'open';}
 function dayCollections(collectorId,date){return S.collections.filter(c=>c.date===date&&collectionCollectorId(c)===collectorId);}
 function dayTotal(collectorId,date){return dayCollections(collectorId,date).reduce((s,c)=>s+c.amount,0);}
+// earliest prior day (before `beforeDate`) that has collections but is not yet approved
+function firstUnapprovedPriorDay(collectorId,beforeDate){
+  const dates=[...new Set(S.collections.filter(c=>collectionCollectorId(c)===collectorId&&c.date<beforeDate).map(c=>c.date))].sort();
+  for(const d of dates){ if(closureStatus(collectorId,d)!=='approved') return d; }
+  return null;
+}
 function isCollectionLocked(col){return closureStatus(collectionCollectorId(col),col.date)==='approved';}
 function clientHasLocked(clientId){return S.collections.some(c=>c.clientId===clientId&&isCollectionLocked(c));}
 function planHasLocked(planId){return S.collections.some(c=>c.planId===planId&&isCollectionLocked(c));}
 async function saveClosure(c){return put('closures',c);}
 async function submitDay(collectorId,date){
+  if(!canEditData())return null;
   const now=new Date().toISOString();let c=getClosure(collectorId,date);
   const total=dayTotal(collectorId,date),count=dayCollections(collectorId,date).length;
   c=Object.assign(c||{id:closureKey(collectorId,date),collectorId,date,approvedBy:null,approvedAt:null},{status:'submitted',submittedAt:now,submittedBy:AUTH.user.id,total,count});
   return saveClosure(c);
 }
 async function approveDay(collectorId,date){
+  if(!canApproveFor(collectorId))return null;
   const now=new Date().toISOString();let c=getClosure(collectorId,date);
   const total=dayTotal(collectorId,date),count=dayCollections(collectorId,date).length;
   c=Object.assign(c||{id:closureKey(collectorId,date),collectorId,date},{status:'approved',approvedBy:AUTH.user.id,approvedAt:now,total,count});
@@ -677,7 +697,7 @@ function go(screen){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('#screen-'+screen).classList.add('active');
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.s===screen));
-  $('#fab').style.display=(screen==='clients')?'grid':'none';
+  $('#fab').style.display=(screen==='clients'&&canEditData())?'grid':'none';
   window.scrollTo(0,0);render();
 }
 function openSheet(html){$('#sheetBody').innerHTML=html;$('#sheetBg').classList.add('show');$('#sheet').classList.add('show');}
@@ -711,7 +731,7 @@ function renderHome(){
   const ready=apc.filter(x=>daysCovered(x.cycle.id,x.plan)>=CYCLE_DAYS);
   const notPaid=apc.filter(x=>daysCovered(x.cycle.id,x.plan)<CYCLE_DAYS&&!collectedToday(x.cycle.id));
   if(apc.length===0){
-    box.innerHTML=`<div class="empty"><div class="em">🌱</div><h3>Welcome to AFODAN</h3><p>Add your first client to start recording daily savings.</p><div style="height:14px"></div><button class="btn" onclick="openAddClient()">+ Add your first client</button></div>`;return;
+    box.innerHTML=`<div class="empty"><div class="em">🌱</div><h3>Welcome to AFODAN</h3><p>${canEditData()?'Add your first client to start recording daily savings.':'No clients yet — collectors will add them here.'}</p>${canEditData()?'<div style="height:14px"></div><button class="btn" onclick="openAddClient()">+ Add your first client</button>':''}</div>`;return;
   }
   if(ready.length===0&&notPaid.length===0){
     box.innerHTML=`<div class="card" style="text-align:center;color:var(--green)"><div style="font-size:30px">✅</div><div style="font-weight:700;margin-top:4px">All caught up!</div><div style="font-size:13px;color:var(--muted);margin-top:2px">Every plan has been collected today.</div></div>`;return;
@@ -747,7 +767,7 @@ function renderClients(){
   if(cliFilter==='due')items=items.filter(c=>activePlans(c.id).some(p=>{const cy=activeCycle(p.id);return cy&&!collectedToday(cy.id)&&daysCovered(cy.id,p)<CYCLE_DAYS;}));
   if(cliQuery){const q=cliQuery.toLowerCase();items=items.filter(c=>(c.name+' '+c.phone+' '+c.business).toLowerCase().includes(q));}
   items.sort((a,b)=>a.name.localeCompare(b.name));
-  if(items.length===0){list.innerHTML=`<div class="empty"><div class="em">👥</div><h3>No clients yet</h3><p>${cliQuery?'No match for your search.':'Tap the + button to register your first client.'}</p></div>`;return;}
+  if(items.length===0){list.innerHTML=`<div class="empty"><div class="em">👥</div><h3>No clients yet</h3><p>${cliQuery?'No match for your search.':(canEditData()?'Tap the + button to register your first client.':'Clients registered by collectors appear here.')}</p></div>`;return;}
   items.forEach(c=>{
     const aps=activePlans(c.id);
     const bal=clientBalance(c.id);
@@ -790,13 +810,13 @@ function openClient(id){
     </div>
     <div class="section-title" style="margin-top:6px">Savings plans</div>
     ${plansHTML}
-    <button class="btn sec" onclick="openAddPlan('${c.id}')">+ Add another plan (different daily amount)</button>
+    ${canEditData()?`<button class="btn sec" onclick="openAddPlan('${c.id}')">+ Add another plan (different daily amount)</button>`:''}
     <div class="section-title">History</div>
     <div class="card">${clientHistoryHTML(c)}</div>
-    <div class="btn-row">
+    ${canEditData()?`<div class="btn-row">
       <button class="btn sec" onclick="openEditClient('${c.id}')">✎ Edit client</button>
       <button class="btn sec" style="color:var(--red)" onclick="confirmDeleteClient('${c.id}')">🗑 Delete</button>
-    </div>`;
+    </div>`:''}`;
   openSheet(html);
 }
 function planCardHTML(c,p){
@@ -821,14 +841,14 @@ function planCardHTML(c,p){
     <div class="prog ${ready?'full':''}"><i style="width:${pct}%"></i></div>
     <div class="daygrid">${grid}</div>
     <div style="font-size:11px;color:var(--muted);margin:8px 0 4px">🟨 Day 1 = business service charge (${fmtMoney(p.dailyAmount)}). Client gets ${fmtMoney(proj)} if paid out now.</div>
-    ${closed?'':`<div class="btn-row" style="margin-top:10px">
+    ${(!closed&&canEditData())?`<div class="btn-row" style="margin-top:10px">
       <button class="btn green sm" onclick="openCollectSheet('${p.id}')">📥 Collect</button>
       <button class="btn sec sm" onclick="openWithdrawSheet('${p.id}')">💸 Withdraw</button>
       <button class="btn ${ready?'':'sec'} sm" onclick="openPayoutSheet('${p.id}')">🏁 Pay out</button>
-    </div>`}
+    </div>`:''}
     <div style="display:flex;gap:14px;margin-top:10px;align-items:center">
       <button class="link" onclick="openPassbook('${p.id}')">📗 View passbook</button>
-      ${closed?'':`<button class="link" style="color:var(--red)" onclick="confirmDeletePlan('${p.id}')">Delete plan</button>`}
+      ${(!closed&&canEditData())?`<button class="link" style="color:var(--red)" onclick="confirmDeletePlan('${p.id}')">Delete plan</button>`:''}
     </div>
   </div>`;
 }
@@ -1159,11 +1179,16 @@ function renderCollect(){
   const apc=allActivePlanCycles();
   const due=apc.filter(x=>!collectedToday(x.cycle.id));
   $('#collectRemain').textContent=`${due.length} plan${due.length===1?'':'s'}`;
+  const blk=canEditData()?firstUnapprovedPriorDay(AUTH.user.id,todayStr()):null;
+  const canWrite=canEditData()&&!blk;
+  const note=$('#collectNote');note.innerHTML='';
+  if(!canEditData())note.innerHTML='<div class="note-box" style="margin-bottom:12px">👁 View only — as administrator you can see collections but not record them.</div>';
+  else if(blk)note.innerHTML=`<div class="note-box" style="margin-bottom:12px">⚠ Your <b>${niceDate(blk)}</b> collection must be approved before you can collect for a new day — submit it from the Home screen.</div>`;
   const list=$('#collectList');list.innerHTML='';
   let items=apc.filter(x=>collectFilter==='done'?collectedToday(x.cycle.id):!collectedToday(x.cycle.id));
   items.sort((a,b)=>clientById(a.plan.clientId).name.localeCompare(clientById(b.plan.clientId).name));
   if(items.length===0){
-    list.innerHTML=`<div class="empty"><div class="em">${collectFilter==='due'?'✅':'📭'}</div><h3>${collectFilter==='due'?'All collected!':'Nothing here yet'}</h3><p>${collectFilter==='due'?'Every active plan has been collected today.':'Collections you record today will show here.'}</p></div>`;return;}
+    list.innerHTML=`<div class="empty"><div class="em">${collectFilter==='due'?'✅':'📭'}</div><h3>${collectFilter==='due'?'All collected!':'Nothing here yet'}</h3><p>${collectFilter==='due'?'Every active plan has been collected today.':'Collections recorded today show here.'}</p></div>`;return;}
   items.forEach(x=>{
     const c=clientById(x.plan.clientId);const dc=daysCovered(x.cycle.id,x.plan);const done=collectedToday(x.cycle.id);
     const b=el('div','cli');
@@ -1171,8 +1196,10 @@ function renderCollect(){
       <div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(x.plan.label)} · ${fmtMoney(x.plan.dailyAmount)}/day · day ${dc}/${CYCLE_DAYS}</div></div>
       <div class="rt"></div>`;
     const rt=b.querySelector('.rt');
-    if(done){rt.innerHTML='<span class="chip paid">Paid ✓</span>';b.onclick=()=>openCollectSheet(x.plan.id);}
-    else{const btn=el('button','btn green sm','+ '+fmtMoney(x.plan.dailyAmount));btn.onclick=(e)=>{e.stopPropagation();quickCollect(x.plan.id);};rt.appendChild(btn);b.onclick=()=>openCollectSheet(x.plan.id);}
+    if(done)rt.innerHTML='<span class="chip paid">Paid ✓</span>';
+    else if(canWrite){const btn=el('button','btn green sm','+ '+fmtMoney(x.plan.dailyAmount));btn.onclick=(e)=>{e.stopPropagation();quickCollect(x.plan.id);};rt.appendChild(btn);}
+    else rt.innerHTML='<span class="chip due">Due</span>';
+    b.onclick=()=>canWrite?openCollectSheet(x.plan.id):openClient(c.id);
     list.appendChild(b);
   });
 }
@@ -1197,9 +1224,9 @@ function renderMoney(){
       <div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(x.plan.label)} · day ${dc}/${CYCLE_DAYS} · ${fmtMoney(bal)} ${ready?'<span class="chip done">Ready</span>':''}</div></div>
       <div class="rt"></div>`;
     const rt=b.querySelector('.rt');
-    const btn=el('button','btn sm '+(ready?'':'sec'),ready?'Pay out':'Withdraw');
-    btn.onclick=(e)=>{e.stopPropagation();ready?openPayoutSheet(x.plan.id):openWithdrawSheet(x.plan.id);};
-    rt.appendChild(btn);b.onclick=()=>openClient(c.id);list.appendChild(b);
+    if(canEditData()){const btn=el('button','btn sm '+(ready?'':'sec'),ready?'Pay out':'Withdraw');btn.onclick=(e)=>{e.stopPropagation();ready?openPayoutSheet(x.plan.id):openWithdrawSheet(x.plan.id);};rt.appendChild(btn);}
+    else if(ready)rt.innerHTML='<span class="status-badge approved">Ready</span>';
+    b.onclick=()=>openClient(c.id);list.appendChild(b);
   });
 }
 
@@ -1236,38 +1263,48 @@ function renderReports(){
 
 /* ---------- SETTINGS ---------- */
 function openSettings(){
-  openSheet(`
-    <h2>Settings</h2>
-    <div class="field"><label>Business name</label><input id="setBiz" value="${esc(S.settings.bizName||'AFODAN')}"></div>
-    <div class="field"><label>Your name (collector)</label><input id="setCollector" value="${esc(S.settings.collector||'')}" placeholder="Optional"></div>
-    <div class="field"><label>Business phone</label><input id="setPhone" value="${esc(S.settings.bizPhone||'')}" placeholder="Optional — shown on printed passbook"></div>
-    <div class="field"><label>Business location</label><input id="setLoc" value="${esc(S.settings.bizLoc||'')}" placeholder="Optional — e.g. Kantamanto, shed 101"></div>
-    <button class="btn" onclick="submitSettings()">✓ Save</button>
-    <div class="divider"></div>
-    <div style="font-size:12.5px;color:var(--muted);line-height:1.6"><b>How it works</b><br>
-      • Each client can hold several plans (e.g. GH₵20/day + GH₵50/day).<br>
-      • Each plan runs ${CYCLE_DAYS} days; the business keeps 1 day's contribution as service charge at payout.<br>
-      • Collections accept any amount — a lump sum covers several days automatically.<br>
-      • All data stays privately on this device and works offline.</div>
-    <div class="divider"></div>
-    <button class="btn sec" onclick="exportData()">⬇ Backup data to file</button>
-    <div class="divider"></div>
-    <div style="font-weight:800;font-size:14px;margin-bottom:10px">Account</div>
-    <div class="kv"><span class="k">Signed in as</span><span class="v">${AUTH.user?esc(AUTH.user.name):''} <span class="rolechip ${AUTH.user?AUTH.user.role:''}">${AUTH.user?roleLabel(AUTH.user.role):''}</span></span></div>
-    <div style="height:12px"></div>
+  const acct=`
+    <div class="section-title" style="margin-top:0">Account</div>
+    <div class="card">
+      <div class="kv"><span class="k">Signed in as</span><span class="v">${AUTH.user?esc(AUTH.user.name):''} <span class="rolechip ${AUTH.user?AUTH.user.role:''}">${AUTH.user?roleLabel(AUTH.user.role):''}</span></span></div>
+    </div>
+    <div style="height:10px"></div>
     <button class="btn sec" onclick="openChangePw()">🔑 Change my password</button>
     ${canManageUsers()?'<div style="height:8px"></div><button class="btn sec" onclick="closeSheet();go(\'users\')">👤 Manage users</button>':''}
     <div style="height:8px"></div>
-    <button class="btn red" onclick="logout()">Log out</button>
+    <button class="btn red" onclick="logout()">Log out</button>`;
+  const biz=isAdmin()?`
+    <div class="section-title">Business information</div>
+    <div class="field"><label>Business name</label><input id="setBiz" value="${esc(S.settings.bizName||'AFODAN')}"></div>
+    <div class="field"><label>Business phone</label><input id="setPhone" value="${esc(S.settings.bizPhone||'')}" placeholder="Shown on the printed passbook"></div>
+    <div class="field"><label>Business location</label><input id="setLoc" value="${esc(S.settings.bizLoc||'')}" placeholder="e.g. Kantamanto, shed 101"></div>
+    <button class="btn" onclick="submitSettings()">✓ Save business info</button>`
+  :`
+    <div class="section-title">Business information</div>
+    <div class="card">
+      <div class="kv"><span class="k">Name</span><span class="v">${esc(S.settings.bizName||'AFODAN')}</span></div>
+      <div class="kv"><span class="k">Phone</span><span class="v">${esc(S.settings.bizPhone||'—')}</span></div>
+      <div class="kv"><span class="k">Location</span><span class="v">${esc(S.settings.bizLoc||'—')}</span></div>
+    </div>
+    <div class="hint" style="margin-top:6px">Only the administrator can change business information.</div>`;
+  openSheet(`<h2>Settings</h2>${acct}${biz}
+    <div class="divider"></div>
+    <button class="btn sec" onclick="exportData()">⬇ Export a data backup</button>
+    <div class="divider"></div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.6"><b>How it works</b><br>
+      • Each client can hold several plans (e.g. GH₵20/day + GH₵50/day).<br>
+      • Each plan runs ${CYCLE_DAYS} days; the business keeps 1 day's contribution as its service charge at payout.<br>
+      • Collections accept any amount — a lump sum covers several days automatically.<br>
+      • Data syncs securely across devices via your Firebase project, and works offline.</div>
     <div style="height:12px"></div>
-    <div style="font-size:11.5px;color:var(--muted);text-align:center">AFODAN · v1.0 · works offline</div>`);
+    <div style="font-size:11.5px;color:var(--muted);text-align:center">AFODAN · v2.0 · cloud sync</div>`);
 }
 async function submitSettings(){
+  if(!isAdmin()){toast('Only the administrator can edit business info','bad');return;}
   await setSetting('bizName',$('#setBiz').value.trim()||'AFODAN');
-  await setSetting('collector',$('#setCollector').value.trim());
   await setSetting('bizPhone',$('#setPhone').value.trim());
   await setSetting('bizLoc',$('#setLoc').value.trim());
-  applyBranding();applySession();closeSheet();toast('Settings saved','good');
+  applyBranding();closeSheet();toast('Business info saved','good');
 }
 function applyBranding(){
   $('#bizName').textContent=S.settings.bizName||'AFODAN';
@@ -1300,33 +1337,50 @@ async function importData(file){
 function buildHomeRole(){
   const box=$('#homeRole');if(!box)return;box.innerHTML='';
   const u=AUTH.user;if(!u)return;const today=todayStr();
+  // admin is read-only on data: hide the quick-actions & balance CTA
+  const ce=canEditData();
+  $('#homeQacts').style.display=ce?'grid':'none';
+  const cta=$('#homeGoCollect');if(cta)cta.style.display=ce?'':'none';
   if(canCollect()){
-    const st=closureStatus(u.id,today),tot=dayTotal(u.id,today),cnt=dayCollections(u.id,today).length;
-    let action;
-    if(st==='approved')action='<span class="status-badge approved">✓ Approved &amp; closed</span>';
-    else if(st==='submitted')action='<span class="status-badge submitted">⏳ Awaiting approval</span>';
-    else action=`<button class="btn sm ${cnt?'':'sec'}" ${cnt?'':'disabled'} onclick="doSubmitDay()">Submit for approval</button>`;
-    box.innerHTML+=`<div class="role-card"><div class="rc-top"><h4>Your collection today</h4>${action}</div>
-      <div style="display:flex;gap:28px;margin-top:12px">
-        <div><div class="bc-k" style="color:var(--muted)">Total</div><div style="font-size:20px;font-weight:800">${fmtMoney(tot)}</div></div>
-        <div><div class="bc-k" style="color:var(--muted)">Entries</div><div style="font-size:20px;font-weight:800">${cnt}</div></div>
-      </div>
-      ${st==='submitted'?'<div style="font-size:12px;color:var(--muted);margin-top:10px">A manager will verify the cash and approve it.</div>':''}
-      ${st==='approved'?'<div style="font-size:12px;color:var(--muted);margin-top:10px">🔒 Locked — this day can no longer be edited or deleted.</div>':''}</div>`;
+    const blk=firstUnapprovedPriorDay(u.id,today);
+    if(blk){ // must clear an earlier unapproved day before collecting today
+      const bst=closureStatus(u.id,blk),btot=dayTotal(u.id,blk),bcnt=dayCollections(u.id,blk).length;
+      const act=bst==='submitted'?'<span class="status-badge submitted">Awaiting approval</span>':`<button class="btn sm" onclick="doSubmitDay('${blk}')">Submit for approval</button>`;
+      box.innerHTML+=`<div class="role-card" style="background:linear-gradient(135deg,#fff1f2,#fef3c7);border-color:#fecaca">
+        <div class="rc-top"><h4>⚠ ${niceDate(blk)} not approved</h4>${act}</div>
+        <div style="font-size:11.5px;color:#9a3412;margin-top:8px">You can't start a new day until this one is approved. ${fmtMoney(btot)} · ${bcnt} ${bcnt===1?'entry':'entries'}.</div></div>`;
+    } else {
+      const st=closureStatus(u.id,today),tot=dayTotal(u.id,today),cnt=dayCollections(u.id,today).length;
+      let action;
+      if(st==='approved')action='<span class="status-badge approved">✓ Approved &amp; closed</span>';
+      else if(st==='submitted')action='<span class="status-badge submitted">⏳ Awaiting approval</span>';
+      else action=`<button class="btn sm ${cnt?'':'sec'}" ${cnt?'':'disabled'} onclick="doSubmitDay()">Submit for approval</button>`;
+      box.innerHTML+=`<div class="role-card"><div class="rc-top"><h4>Your collection today</h4>${action}</div>
+        <div style="display:flex;gap:26px;margin-top:11px">
+          <div><div class="bc-k" style="color:var(--muted)">Total</div><div style="font-size:18px;font-weight:800">${fmtMoney(tot)}</div></div>
+          <div><div class="bc-k" style="color:var(--muted)">Entries</div><div style="font-size:18px;font-weight:800">${cnt}</div></div>
+        </div>
+        ${st==='submitted'?'<div style="font-size:11.5px;color:var(--muted);margin-top:9px">A manager will verify the cash and approve it.</div>':''}
+        ${st==='approved'?'<div style="font-size:11.5px;color:var(--muted);margin-top:9px">🔒 Locked — this day can no longer be edited or deleted.</div>':''}</div>`;
+    }
   }
-  if(canSeeAll()){
+  if(isManager()){
     const pend=pendingClosures().filter(c=>canApproveFor(c.collectorId));
     box.innerHTML+=`<button class="role-card" style="width:100%;text-align:left;display:block" onclick="go('approvals')">
       <div class="rc-top"><h4>💰 Approvals</h4>${pend.length?`<span class="status-badge submitted">${pend.length} pending</span>`:'<span class="status-badge open">None pending</span>'}</div>
-      <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Review &amp; close other collectors' daily collections.</div></button>`;
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">Review &amp; close other collectors' daily collections.</div></button>`;
   }
   if(canManageUsers()){
     box.innerHTML+=`<button class="role-card" style="width:100%;text-align:left;display:block" onclick="go('users')">
       <div class="rc-top"><h4>👤 User management</h4><span class="status-badge open">${S.users.length} users</span></div>
-      <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Add collectors, block accounts, reset passwords.</div></button>`;
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">Add users, block accounts, change roles.</div></button>`;
+  }
+  if(isAdmin()){
+    box.innerHTML+=`<div class="role-card" style="background:var(--soft)"><div class="rc-top"><h4>👁 Read-only overview</h4></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">As administrator you can view clients, collections and reports, and manage users — but you don't record collections or approvals.</div></div>`;
   }
 }
-async function doSubmitDay(){await submitDay(AUTH.user.id,todayStr());toast('Day submitted for approval ✓','good');render();}
+async function doSubmitDay(date){await submitDay(AUTH.user.id,date||todayStr());toast('Day submitted for approval ✓','good');render();}
 
 /* ---- Approvals ---- */
 function renderApprovals(){

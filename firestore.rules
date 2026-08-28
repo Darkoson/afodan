@@ -16,7 +16,8 @@ service cloud.firestore {
     function staff() { return hasProfile() && active(); }
     function isAdmin()   { return staff() && role() == 'admin'; }
     function isManager() { return staff() && role() == 'manager'; }
-    function seesAll()   { return isAdmin() || isManager(); }
+    function seesAll()   { return isAdmin() || isManager(); }          // read scope
+    function isWriter()  { return staff() && role() in ['manager','collector']; } // admin is read-only
 
     // is a given collector's day locked (approved)?
     function dayApproved(collectorId, date) {
@@ -34,42 +35,40 @@ service cloud.firestore {
                     && request.resource.data.role == 'admin';
     }
 
-    // ---- clients: collectors see only their own; managers/admin see all ----
+    // ---- clients: collectors see/write only their own; managers write all; admin read-only ----
     match /clients/{id} {
       allow read:   if staff() && (seesAll() || resource.data.ownerId == request.auth.uid);
-      allow create: if staff() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if staff() && (seesAll() || resource.data.ownerId == request.auth.uid);
-      allow delete: if staff() && (seesAll() || resource.data.ownerId == request.auth.uid);
+      allow create: if isWriter() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isWriter() && (isManager() || resource.data.ownerId == request.auth.uid);
+      allow delete: if isWriter() && (isManager() || resource.data.ownerId == request.auth.uid);
     }
 
-    // ---- plans / cycles: any active staff (visibility is scoped in-app) ----
-    match /plans/{id}  { allow read, write: if staff(); }
-    match /cycles/{id} { allow read, write: if staff(); }
+    // ---- plans / cycles: staff read, writers write ----
+    match /plans/{id}  { allow read: if staff(); allow write: if isWriter(); }
+    match /cycles/{id} { allow read: if staff(); allow write: if isWriter(); }
 
-    // ---- collections: locked once the day is approved (server-enforced immutability) ----
+    // ---- collections: writers only, and locked once the day is approved (server-enforced) ----
     match /collections/{id} {
       allow read:   if staff();
-      allow create: if staff() &&
+      allow create: if isWriter() &&
                     !dayApproved(request.resource.data.collectorId, request.resource.data.date);
-      allow update, delete: if staff() &&
+      allow update, delete: if isWriter() &&
                     !dayApproved(resource.data.collectorId, resource.data.date);
     }
 
     // ---- withdrawals ----
-    match /withdrawals/{id} { allow read, write: if staff(); }
+    match /withdrawals/{id} { allow read: if staff(); allow write: if isWriter(); }
 
-    // ---- closures (daily submit/approve): staff submit; managers/admin approve; never delete ----
+    // ---- closures: writers submit; only a manager (not the owner) approves; never deleted ----
     match /closures/{id} {
       allow read:   if staff();
-      // submit (create/set to submitted) allowed for staff; approving requires manager/admin
-      allow create: if staff();
-      allow update: if staff() &&
-                    ( request.resource.data.status != 'approved'
-                      || ( seesAll() && resource.data.collectorId != request.auth.uid ) );
+      allow create: if isWriter();
+      allow update: if (isWriter() && request.resource.data.status != 'approved')
+                    || (isManager() && resource.data.collectorId != request.auth.uid);
       allow delete: if false;
     }
 
-    // ---- business settings: managers/admin write, staff read ----
-    match /settings/{id} { allow read: if staff(); allow write: if seesAll(); }
+    // ---- business settings: admin writes, all staff read ----
+    match /settings/{id} { allow read: if staff(); allow write: if isAdmin(); }
   }
 }
