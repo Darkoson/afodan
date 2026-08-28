@@ -1,3 +1,5 @@
 .DS_Store
 *.log
 susu-backup-*.json
+
+_stale_locks/

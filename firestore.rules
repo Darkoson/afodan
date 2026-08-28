@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- helpers ----
+    function signedIn() { return request.auth != null; }
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function hasProfile() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function role() { return profile().role; }
+    function active() { return profile().status == 'active'; }
+    function staff() { return hasProfile() && active(); }
+    function isAdmin()   { return staff() && role() == 'admin'; }
+    function isManager() { return staff() && role() == 'manager'; }
+    function seesAll()   { return isAdmin() || isManager(); }
+
+    // is a given collector's day locked (approved)?
+    function dayApproved(collectorId, date) {
+      return exists(/databases/$(database)/documents/closures/$(collectorId + '_' + date)) &&
+        get(/databases/$(database)/documents/closures/$(collectorId + '_' + date)).data.status == 'approved';
+    }
+
+    // ---- users: only admin manages; any signed-in user can read (for role lookups/UI) ----
+    match /users/{uid} {
+      allow read:   if signedIn();
+      allow create, update, delete: if isAdmin();
+      // one-time bootstrap: the designated admin account creates its own admin profile
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.auth.token.email == 'admin@afodan.app'
+                    && request.resource.data.role == 'admin';
+    }
+
+    // ---- clients: collectors see only their own; managers/admin see all ----
+    match /clients/{id} {
+      allow read:   if staff() && (seesAll() || resource.data.ownerId == request.auth.uid);
+      allow create: if staff() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if staff() && (seesAll() || resource.data.ownerId == request.auth.uid);
+      allow delete: if staff() && (seesAll() || resource.data.ownerId == request.auth.uid);
+    }
+
+    // ---- plans / cycles: any active staff (visibility is scoped in-app) ----
+    match /plans/{id}  { allow read, write: if staff(); }
+    match /cycles/{id} { allow read, write: if staff(); }
+
+    // ---- collections: locked once the day is approved (server-enforced immutability) ----
+    match /collections/{id} {
+      allow read:   if staff();
+      allow create: if staff() &&
+                    !dayApproved(request.resource.data.collectorId, request.resource.data.date);
+      allow update, delete: if staff() &&
+                    !dayApproved(resource.data.collectorId, resource.data.date);
+    }
+
+    // ---- withdrawals ----
+    match /withdrawals/{id} { allow read, write: if staff(); }
+
+    // ---- closures (daily submit/approve): staff submit; managers/admin approve; never delete ----
+    match /closures/{id} {
+      allow read:   if staff();
+      // submit (create/set to submitted) allowed for staff; approving requires manager/admin
+      allow create: if staff();
+      allow update: if staff() &&
+                    ( request.resource.data.status != 'approved'
+                      || ( seesAll() && resource.data.collectorId != request.auth.uid ) );
+      allow delete: if false;
+    }
+
+    // ---- business settings: managers/admin write, staff read ----
+    match /settings/{id} { allow read: if staff(); allow write: if seesAll(); }
+  }
+}

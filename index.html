@@ -8,6 +8,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>AFODAN</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <style>
   :root{
     /* brand — indigo→violet fintech palette */
@@ -221,7 +224,7 @@
   .cam-shot:active{transform:scale(.93)}
   .cam-x{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:19px;display:grid;place-items:center}
   /* ---- login ---- */
-  body:not(.authed) .app-header,body:not(.authed) .nav,body:not(.authed) .fab{display:none!important}
+  body:not(.authed) .app-header,body:not(.authed) .nav,body:not(.authed) .fab,body:not(.authed) .screen{display:none!important}
   #login{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:linear-gradient(150deg,#4f46e5 0%,#4338ca 45%,#312e81 100%)}
   #login.show{display:flex}
   .login-card{position:relative;width:100%;max-width:380px;background:#fff;border-radius:26px;padding:0 26px 24px;box-shadow:0 30px 70px rgba(0,0,0,.4);overflow:hidden;animation:fade .3s ease}
@@ -414,32 +417,39 @@
 const CYCLE_DAYS = 31;
 const CUR = 'GH₵';
 
-/* ---------- IndexedDB ---------- */
-const DB_NAME='susu_db', DB_VER=3;
-let _db=null;
-function openDB(){
-  return new Promise((res,rej)=>{
-    const r=indexedDB.open(DB_NAME,DB_VER);
-    r.onupgradeneeded=e=>{
-      const db=e.target.result;
-      const mk=(n,idx)=>{if(!db.objectStoreNames.contains(n)){const s=db.createObjectStore(n,{keyPath:'id'});(idx||[]).forEach(i=>s.createIndex(i,i));}};
-      mk('clients',['ownerId']);
-      mk('plans',['clientId']);
-      mk('cycles',['clientId','planId']);
-      mk('collections',['clientId','planId','cycleId','date','collectorId']);
-      mk('withdrawals',['clientId','planId','cycleId']);
-      mk('users',['username']);
-      mk('closures',['collectorId','date','status']);
-      if(!db.objectStoreNames.contains('settings'))db.createObjectStore('settings',{keyPath:'key'});
-    };
-    r.onsuccess=e=>{_db=e.target.result;res(_db);};
-    r.onerror=e=>rej(e.target.error);
-  });
+/* ---------- Firebase (Firestore + Auth) backend ----------
+   Data lives in Cloud Firestore and syncs live across devices; offline cache
+   keeps it working with no connection. Auth + security rules enforce roles
+   and the "no delete after approval" rule on the server. */
+const firebaseConfig={apiKey:"AIzaSyCJoT9fnxzwEKQOic6fO1LgJDGysuvx7uw",authDomain:"afodan-123.firebaseapp.com",projectId:"afodan-123",storageBucket:"afodan-123.firebasestorage.app",messagingSenderId:"103566332663",appId:"1:103566332663:web:69ff8189ca7fbcb7f4b9f2"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+const fbauth=firebase.auth();
+try{db.enablePersistence({synchronizeTabs:true}).catch(()=>{});}catch(e){}
+const COLLS=['clients','plans','cycles','collections','withdrawals','users','closures'];
+const ADMIN_EMAIL='admin@afodan.app';
+const emailFor=u=>`${(u||'').trim().toLowerCase()}@afodan.app`;
+function upsertLocal(store,val){const a=S[store];if(!a)return;const i=a.findIndex(x=>x.id===val.id);if(i<0)a.push(val);else a[i]=val;}
+function removeLocal(store,id){if(S[store])S[store]=S[store].filter(x=>x.id!==id);}
+async function put(store,val){await db.collection(store).doc(val.id).set(val);upsertLocal(store,val);return val;}
+async function del(store,id){await db.collection(store).doc(id).delete();removeLocal(store,id);}
+// collectors may only read their own clients (per security rules) -> scope that query
+function collForRole(name){
+  if(name==='clients' && AUTH.user && !canSeeAll()) return db.collection('clients').where('ownerId','==',AUTH.user.id);
+  return db.collection(name);
 }
-function tx(store,mode){return _db.transaction(store,mode).objectStore(store);}
-function put(store,val){return new Promise((res,rej)=>{const r=tx(store,'readwrite').put(val);r.onsuccess=()=>res(val);r.onerror=()=>rej(r.error);});}
-function del(store,key){return new Promise((res,rej)=>{const r=tx(store,'readwrite').delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});}
-function getAll(store){return new Promise((res,rej)=>{const r=tx(store,'readonly').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});}
+let _unsubs=[];
+function startListeners(){
+  stopListeners();
+  COLLS.forEach(c=>{
+    _unsubs.push(collForRole(c).onSnapshot(snap=>{
+      snap.docChanges().forEach(ch=>{if(ch.type==='removed')removeLocal(c,ch.doc.id);else upsertLocal(c,ch.doc.data());});
+      if(document.body.classList.contains('authed'))render();
+    },err=>{console.warn('listen',c,err&&err.code);}));
+  });
+  _unsubs.push(db.collection('settings').doc('business').onSnapshot(d=>{if(d&&d.exists){S.settings=d.data()||{};applyBranding();if(document.body.classList.contains('authed'))applySession();}}));
+}
+function stopListeners(){_unsubs.forEach(u=>{try{u();}catch(e){}});_unsubs=[];}
 
 /* ---------- helpers ---------- */
 const uid=()=> (Date.now().toString(36)+Math.random().toString(36).slice(2,8));
@@ -461,10 +471,10 @@ let _formPhoto='';
 /* ---------- cache ---------- */
 let S={clients:[],plans:[],cycles:[],collections:[],withdrawals:[],users:[],closures:[],settings:{}};
 async function loadAll(){
-  const[clients,plans,cycles,collections,withdrawals,users,closures,settingsArr]=await Promise.all([
-    getAll('clients'),getAll('plans'),getAll('cycles'),getAll('collections'),getAll('withdrawals'),getAll('users'),getAll('closures'),getAll('settings')]);
-  Object.assign(S,{clients,plans,cycles,collections,withdrawals,users,closures});
-  S.settings={};settingsArr.forEach(x=>S.settings[x.key]=x.value);
+  const results=await Promise.all(COLLS.map(c=>collForRole(c).get()));
+  COLLS.forEach((c,i)=>{S[c]=results[i].docs.map(d=>d.data());});
+  const sdoc=await db.collection('settings').doc('business').get();
+  S.settings=sdoc.exists?(sdoc.data()||{}):{};
 }
 
 /* ---------- domain ---------- */
@@ -496,21 +506,21 @@ function profitInMonth(mk){const sc=scopeSet();return S.cycles.filter(c=>c.statu
 async function addClient(data){
   const now=new Date().toISOString();
   const client={id:uid(),ownerId:(AUTH.user&&AUTH.user.id)||null,name:data.name.trim(),phone:(data.phone||'').trim(),altPhone:(data.altPhone||'').trim(),business:(data.business||'').trim(),note:(data.note||'').trim(),photo:data.photo||'',status:'active',createdAt:now};
-  await put('clients',client);S.clients.push(client);
+  await put('clients',client);
   await addPlan(client.id,{label:data.planLabel,dailyAmount:data.dailyAmount,cardNo:data.cardNo});
   return client;
 }
 async function addPlan(clientId,{label,dailyAmount,cardNo}){
   const amt=Math.max(1,Math.round(+dailyAmount||0));
   const plan={id:uid(),clientId,label:(label||'').trim()||(fmtMoney(amt)+'/day'),cardNo:(cardNo||'').trim()||nextCardNo(),dailyAmount:amt,status:'active',createdAt:new Date().toISOString()};
-  await put('plans',plan);S.plans.push(plan);
+  await put('plans',plan);
   await startCycle(plan);
   return plan;
 }
 async function startCycle(plan){
   const num=S.cycles.filter(c=>c.planId===plan.id).reduce((m,c)=>Math.max(m,c.number),0)+1;
   const cycle={id:uid(),planId:plan.id,clientId:plan.clientId,number:num,startDate:todayStr(),status:'active',targetDays:CYCLE_DAYS,serviceCharge:0,payout:0,collectedTotal:0,completedAt:null,createdAt:new Date().toISOString()};
-  await put('cycles',cycle);S.cycles.push(cycle);
+  await put('cycles',cycle);
   return cycle;
 }
 async function recordCollection(plan,amount,dateStr){
@@ -520,12 +530,12 @@ async function recordCollection(plan,amount,dateStr){
   if(closureStatus(collectorId,date)==='approved'){toast('That day is approved & closed — records are locked','bad');return null;}
   let cycle=activeCycle(plan.id);if(!cycle)cycle=await startCycle(plan);
   const c={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,collectorId,recordedBy:(AUTH.user&&AUTH.user.id)||null,date,amount:Math.round(+amount),createdAt:new Date().toISOString()};
-  await put('collections',c);S.collections.push(c);
+  await put('collections',c);
   return c;
 }
 async function recordPartial(plan,cycle,amount){
   const w={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,date:todayStr(),type:'partial',amount:Math.round(+amount),serviceCharge:0,createdAt:new Date().toISOString()};
-  await put('withdrawals',w);S.withdrawals.push(w);return w;
+  await put('withdrawals',w);return w;
 }
 async function payout(plan,cycle,{startNew}){
   const collected=collectedTotal(cycle.id);const partials=partialsTotal(cycle.id);
@@ -534,7 +544,7 @@ async function payout(plan,cycle,{startNew}){
   Object.assign(cycle,{status:'completed',serviceCharge:charge,payout:pay,collectedTotal:collected,completedAt:todayStr()});
   await put('cycles',cycle);
   const w={id:uid(),clientId:plan.clientId,planId:plan.id,cycleId:cycle.id,date:todayStr(),type:'payout',amount:pay,serviceCharge:charge,createdAt:new Date().toISOString()};
-  await put('withdrawals',w);S.withdrawals.push(w);
+  await put('withdrawals',w);
   if(startNew)await startCycle(plan); else {plan.status='closed';await put('plans',plan);}
   return{charge,pay,collected};
 }
@@ -552,7 +562,7 @@ async function deleteClient(client){
   for(const p of clientPlans(client.id))await deletePlan(p);
   await del('clients',client.id);S.clients=S.clients.filter(x=>x.id!==client.id);
 }
-async function setSetting(k,v){await put('settings',{key:k,value:v});S.settings[k]=v;}
+async function setSetting(k,v){S.settings[k]=v;await db.collection('settings').doc('business').set({[k]:v},{merge:true});}
 
 /* ==================================================================
    AUTH · ROLES · DAILY-APPROVAL   (Phase 1 — local; Phase 2 syncs via backend)
@@ -586,14 +596,13 @@ function canManageUsers(){return isAdmin();}
 function canApproveFor(collectorId){return(isManager()||isAdmin())&&collectorId!==AUTH.user.id;}
 
 async function login(username,password){
-  const u=userByUsername(username);
-  if(!u)return{ok:false,msg:'Unknown username'};
-  if(u.status==='blocked')return{ok:false,msg:'This account is blocked. Contact the administrator.'};
-  if((await sha256(password||''))!==u.pass)return{ok:false,msg:'Incorrect password'};
-  AUTH.user=u;try{localStorage.setItem('afodan_session',u.id);}catch(e){}
-  return{ok:true};
+  try{await fbauth.signInWithEmailAndPassword(emailFor(username),password);return{ok:true};}
+  catch(e){const c=e.code||'';
+    return{ok:false,msg:/invalid-credential|wrong-password|user-not-found|invalid-email/.test(c)?'Wrong username or password'
+      :(c==='auth/too-many-requests'?'Too many attempts — please wait and try again'
+      :(c==='auth/network-request-failed'?'No connection — check your internet':(e.message||'Login failed')))};}
 }
-function logout(){AUTH.user=null;try{localStorage.removeItem('afodan_session');}catch(e){}closeSheet();showLogin();}
+function logout(){closeSheet();fbauth.signOut();}
 
 /* ---- visibility scope ---- */
 const ownsClient=c=>!!c&&c.ownerId===(AUTH.user&&AUTH.user.id);
@@ -610,7 +619,7 @@ function dayTotal(collectorId,date){return dayCollections(collectorId,date).redu
 function isCollectionLocked(col){return closureStatus(collectionCollectorId(col),col.date)==='approved';}
 function clientHasLocked(clientId){return S.collections.some(c=>c.clientId===clientId&&isCollectionLocked(c));}
 function planHasLocked(planId){return S.collections.some(c=>c.planId===planId&&isCollectionLocked(c));}
-async function saveClosure(c){await put('closures',c);const i=S.closures.findIndex(x=>x.id===c.id);if(i<0)S.closures.push(c);else S.closures[i]=c;return c;}
+async function saveClosure(c){return put('closures',c);}
 async function submitDay(collectorId,date){
   const now=new Date().toISOString();let c=getClosure(collectorId,date);
   const total=dayTotal(collectorId,date),count=dayCollections(collectorId,date).length;
@@ -629,17 +638,31 @@ function pendingClosures(){return S.closures.filter(c=>c.status==='submitted');}
 async function addUser(data){
   const username=(data.username||'').trim().toLowerCase();
   if(!data.name.trim()||!username)return{ok:false,msg:'Name and username are required'};
-  if(userByUsername(username))return{ok:false,msg:'That username already exists'};
-  const u={id:uid(),name:data.name.trim(),username,role:data.role||'collector',pass:await sha256(data.password||DEFAULT_PW),status:'active',createdAt:new Date().toISOString()};
-  await put('users',u);S.users.push(u);return{ok:true,user:u};
+  if(!/^[a-z0-9_]+$/.test(username))return{ok:false,msg:'Username: letters, numbers, underscore only'};
+  if(S.users.some(u=>u.username===username))return{ok:false,msg:'That username already exists'};
+  const pw=(data.password&&data.password.length>=6)?data.password:DEFAULT_PW;
+  let sec;
+  try{
+    sec=firebase.initializeApp(firebaseConfig,'sec_'+Date.now());
+    const cred=await sec.auth().createUserWithEmailAndPassword(emailFor(username),pw);
+    const nu={id:cred.user.uid,name:data.name.trim(),username,role:data.role||'collector',status:'active',createdAt:new Date().toISOString()};
+    await sec.auth().signOut();
+    await db.collection('users').doc(nu.id).set(nu); // written by signed-in admin -> allowed by rules
+    return{ok:true,user:nu,tempPw:pw};
+  }catch(e){const c=e.code||'';
+    return{ok:false,msg:c==='auth/email-already-in-use'?'That username is already taken':(c==='auth/weak-password'?'Password must be at least 6 characters':(e.message||'Could not create user'))};}
+  finally{ if(sec){try{await sec.delete();}catch(_){}} }
 }
-async function setUserStatus(id,status){const u=userById(id);if(u){u.status=status;await put('users',u);}}
-async function setUserRole(id,role){const u=userById(id);if(u){u.role=role;await put('users',u);}}
-async function resetUserPassword(id,pw){const u=userById(id);if(u){u.pass=await sha256(pw||DEFAULT_PW);await put('users',u);}}
+async function setUserStatus(id,status){await db.collection('users').doc(id).update({status});}
+async function setUserRole(id,role){await db.collection('users').doc(id).update({role});}
 async function changeMyPassword(oldPw,newPw){
-  if((await sha256(oldPw||''))!==AUTH.user.pass)return{ok:false,msg:'Current password is wrong'};
-  if(!newPw||newPw.length<4)return{ok:false,msg:'New password must be at least 4 characters'};
-  AUTH.user.pass=await sha256(newPw);await put('users',AUTH.user);return{ok:true};
+  if(!newPw||newPw.length<6)return{ok:false,msg:'New password must be at least 6 characters'};
+  try{
+    const cred=firebase.auth.EmailAuthProvider.credential(fbauth.currentUser.email,oldPw||'');
+    await fbauth.currentUser.reauthenticateWithCredential(cred);
+    await fbauth.currentUser.updatePassword(newPw);
+    return{ok:true};
+  }catch(e){const c=e.code||'';return{ok:false,msg:/wrong-password|invalid-credential/.test(c)?'Current password is wrong':(e.message||'Could not update password')};}
 }
 
 /* ==================================================================
@@ -1377,16 +1400,12 @@ function openManageUser(id){
       </select>${self?'<div class="hint">You cannot change your own role.</div>':''}</div>
     <button class="btn" onclick="saveUserRole('${u.id}')" ${self?'disabled':''}>Save role</button>
     <div class="divider"></div>
-    <div class="field"><label>Reset password</label><input id="muPw" placeholder="New password (min 4 chars)"></div>
-    <button class="btn sec" onclick="doResetPw('${u.id}')">Reset password</button>
-    <div class="divider"></div>
     ${self?'<div class="note-box">You cannot block your own account.</div>':(u.status==='blocked'
       ?`<button class="btn green" onclick="doBlock('${u.id}','active')">✓ Unblock account</button>`
       :`<button class="btn red" onclick="doBlock('${u.id}','blocked')">🚫 Block account</button>`)}
     <div style="height:8px"></div><button class="btn sec" onclick="go('users')">Back</button>`);
 }
 async function saveUserRole(id){await setUserRole(id,$('#muRole').value);closeSheet();toast('Role updated','good');renderUsers();}
-async function doResetPw(id){const pw=$('#muPw').value.trim();if(pw.length<4){toast('Min 4 characters','bad');return;}await resetUserPassword(id,pw);closeSheet();toast('Password reset','good');}
 async function doBlock(id,status){await setUserStatus(id,status);closeSheet();toast(status==='blocked'?'Account blocked':'Account unblocked','good');renderUsers();}
 function openAddUser(){
   openSheet(`<h2>Add user</h2><p class="sub">Create a collector, manager or admin account.</p>
@@ -1401,16 +1420,23 @@ function openAddUser(){
     <div style="height:8px"></div><button class="btn sec" onclick="go('users')">Cancel</button>`);
 }
 async function doAddUser(){
+  const btn=event&&event.target;if(btn){btn.disabled=true;btn.textContent='Creating…';}
   const r=await addUser({name:$('#auName').value,username:$('#auUser').value,role:$('#auRole').value,password:$('#auPw').value.trim()});
-  if(!r.ok){toast(r.msg,'bad');return;}
-  closeSheet();toast('User created ✓','good');renderUsers();
+  if(!r.ok){toast(r.msg,'bad');if(btn){btn.disabled=false;btn.textContent='✓ Create user';}return;}
+  openSheet(`<h2>User created ✓</h2><p class="sub">Share these login details with ${esc(r.user.name)}.</p>
+    <div class="card"><div class="kv"><span class="k">Username</span><span class="v">${esc(r.user.username)}</span></div>
+    <div class="kv"><span class="k">Password</span><span class="v">${esc(r.tempPw)}</span></div>
+    <div class="kv"><span class="k">Role</span><span class="v">${roleLabel(r.user.role)}</span></div></div>
+    <div class="note-box" style="margin-top:12px">Ask them to change this password in Settings after their first login.</div>
+    <div style="height:12px"></div><button class="btn" onclick="go('users')">Done</button>`);
+  renderUsers();
 }
 
 /* ---- account / password ---- */
 function openChangePw(){
   openSheet(`<h2>Change password</h2>
     <div class="field"><label>Current password</label><input id="cpOld" type="password"></div>
-    <div class="field"><label>New password</label><input id="cpNew" type="password" placeholder="min 4 characters"></div>
+    <div class="field"><label>New password</label><input id="cpNew" type="password" placeholder="min 6 characters"></div>
     <button class="btn" onclick="doChangePw()">✓ Update password</button>
     <div style="height:8px"></div><button class="btn sec" onclick="openSettings()">Back</button>`);
 }
@@ -1426,7 +1452,7 @@ $('#loginForm').addEventListener('submit',async e=>{
   e.preventDefault();const err=$('#loginErr');err.textContent='Signing in…';
   const r=await login($('#loginUser').value,$('#loginPass').value);
   if(!r.ok){err.textContent=r.msg;return;}
-  err.textContent='';enterApp();
+  // success — onAuthStateChanged loads data and enters the app
 });
 $('#loginToggle').addEventListener('click',()=>{const p=$('#loginPass');p.type=p.type==='password'?'text':'password';});
 $('#nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.s);});
@@ -1446,13 +1472,25 @@ function updateOnline(){$('#offlinePill').classList.toggle('show',!navigator.onL
 window.addEventListener('online',updateOnline);window.addEventListener('offline',updateOnline);
 
 /* ---------- boot ---------- */
-(async function(){
-  try{
-    await openDB();await loadAll();await seedUsers();await migrateOwnership();applyBranding();updateOnline();
-    let sid=null;try{sid=localStorage.getItem('afodan_session');}catch(e){}
-    const u=sid&&userById(sid);
-    if(u&&u.status==='active'){AUTH.user=u;enterApp();}else{showLogin();}
-  }catch(e){document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:sans-serif"><h2>Storage unavailable</h2><p>This app needs on-device storage (IndexedDB). Please open it in a normal browser tab, not private mode.</p><p style="color:#888;font-size:13px">'+esc(e.message||e)+'</p></div>';}
+(function(){
+  updateOnline();
+  try{fbauth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);}catch(e){}
+  fbauth.onAuthStateChanged(async user=>{
+    if(!user){AUTH.user=null;stopListeners();showLogin();return;}
+    try{
+      let snap=await db.collection('users').doc(user.uid).get();
+      if(!snap.exists){
+        if(user.email===ADMIN_EMAIL){ // one-time bootstrap of the administrator profile
+          const doc={id:user.uid,name:'Administrator',username:'admin',role:'admin',status:'active',createdAt:new Date().toISOString()};
+          await db.collection('users').doc(user.uid).set(doc);snap={exists:true,data:()=>doc};
+        }else{const e=$('#loginErr');if(e)e.textContent='No profile for this account. Ask the administrator to add you.';await fbauth.signOut();return;}
+      }
+      const p=snap.data();
+      if(p.status==='blocked'){const e=$('#loginErr');if(e)e.textContent='This account is blocked. Contact the administrator.';await fbauth.signOut();return;}
+      AUTH.user=Object.assign({},p,{id:user.uid,uid:user.uid});
+      await loadAll();startListeners();applyBranding();enterApp();
+    }catch(err){const e=$('#loginErr');if(e)e.textContent=(err&&err.message)||'Sign-in error';try{await fbauth.signOut();}catch(_){}}
+  });
 })();
 
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));}
